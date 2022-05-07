@@ -3,11 +3,21 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: top;
+  align-items: left;
+  background-color:aliceblue;
 }
 
 button {
-  width: 4em;
-  margin: 0 0.5em;
+  width: 15em;
+  margin: 0.5em 0.5em;
+  background-color: whitesmoke;
+}
+
+textarea {
+  width: 99%;
+  resize:none;
+  font-size: 12px;
+  overflow-y: scroll;
+  background-color: whitesmoke;
 }

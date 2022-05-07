@@ -1,29 +1,49 @@
-# electron-react-ts
+# DQXChatManager
 
-<img src="https://user-images.githubusercontent.com/52094761/154874997-a6fea4fa-49da-46c6-9b54-6f0f0d4cf6d2.svg#gh-light-mode-only" width="100%">
-<img src="https://user-images.githubusercontent.com/52094761/154875034-abe01e30-6a82-4e55-928e-c31d88c39b07.svg#gh-dark-mode-only" width="100%">
+## はじめに  
+- DQXのよく使うセリフを管理するツールです  
+- [Edge](https://www.microsoft.com/ja-jp/edge)がインストールされたWindows PCが必要です（普通は入っていると思います）  
+- Mac/スマホなどでは動作しません
+- このページの内容をよく読み理解できる方のみ使用願います  
 
-An [Electron](https://www.electronjs.org/) boilerplate with hot reloading for [React](https://reactjs.org/) and [TypeScript](https://www.typescriptlang.org/).
+![](./media/screen01.png)
 
-[![GitHub license](https://img.shields.io/github/license/sprout2000/electron-react-ts)](https://github.com/sprout2000/electron-react-ts/blob/main/LICENSE.md)
-[![GitHub stars](https://img.shields.io/github/stars/sprout2000/electron-react-ts)](https://github.com/sprout2000/electron-react-ts/stargazers)
 
-## :green_book: Usage
+## 機能
+- 現在のよく使うセリフの設定をテキストへ出力する
+- テキストの内容をもとに、アプリがブラウザを操作してよく使うセリフを設定する
 
-```sh
-$ git clone https://github.com/sprout2000/electron-react-ts.git
-$ cd electron-react-ts
-$ npm install
+## ダウンロード
+[ダウンロード]()  
+ダウンロードしたZIPファイルを展開して、中のDQXChatManager.exeを実行してください
 
-# on development
-$ npm run dev
 
-# on production
-$ npm run build
+## 使い方（設定出力）
+- 初回起動時に画像のような画面が出るので✕で消すかキャンセルしてください
+![](./media/screen05.png)
+- 「広場ログイン」ボタン押すとブラウザが立ち上がるのでログインしてください。よく使うセリフのページが表示されるはずです
+- 「設定をテキストへ出力」ボタン押すとテキストボックスに設定が書き出されるのでメモ帳アプリ等へ保存しておいてください
+
+## 使い方（取り込みテスト）
+- まず動作チェックをしてください
+- この後の操作をすると、よく使うセリフ１ページ目の先頭が書き換わります
+- テキストボックスに下の文字を正確にコピペしてください
 ```
+emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
+```
+![](./media/screen02.png)
+- 「設定をテキストから取り込み」ボタンを押すと確認画面が出てOKを押すとアプリがブラウザを操作して設定を書き込みます
+![](./media/screen03.png)
+- １ページ目の先頭が変わっていたら成功です
+![](./media/screen04.png)
 
-_NOTE: You will need to have [Node.js](https://nodejs.org/) and [Git](https://git-scm.com/) installed._
+## 使い方（取り込み）
+- 「広場ログイン」後に、保存しておいた設定テキストをテキストボックスに貼り付けて「設定をテキストから取り込み」ボタンを押すと、アプリがブラウザを操作して設定を書き込みます
+- 今の設定が上書きされてしまうので注意
+- 設定中の中断はできません。動きがおかしいなと思ったら、ブラウザを✕ボタンで閉じてください
+- 設定の不要な行を削除しておくと早く終わります
+- 他のキャラクターへの設定引っ越しなどもできるかと思いますが、動作は未確認です
 
-## :copyright: License
-
-Copyright (c) 2021 sprout2000
+## 注意事項
+- Edgeのアップデート直後はうまく動作しない場合があります
+- アプリが制御しているブラウザへのログインIDやパスの入力が心配であればワンタイムパスワードを設定しておいてください
