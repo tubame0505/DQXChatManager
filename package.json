@@ -2,7 +2,7 @@
   "name": "electron-react-ts",
   "productName": "DQX Chat Manager",
   "description": "DQX Chat Manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "author": {"name": "tubame0505"},
   "main": "dist/main.js",

@@ -417,6 +417,7 @@ const setStamp = async (
     await openButton.click();
     const stampOptions = await stampSlecterArea.findElements(By.css("div"));
     const targetStampNo = emoteData.contents.split("_")[0];
+    let isSetSuccess = false;
     for (let i = 0; i < stampOptions.length; i++) {
         const stampOption = stampOptions[i];
         const className = await stampOption.getAttribute("class");
@@ -425,9 +426,13 @@ const setStamp = async (
             const stampNo = await button.getAttribute("data-value");
             if (stampNo === targetStampNo) {
                 await button.click();
+                isSetSuccess = true;
                 break;
             }
         }
+    }
+    if (!isSetSuccess) {
+        addLog(`スタンプ ${emoteData.contents}の設定に失敗しました`);
     }
     /* しぐさ */
     const actionList = await (
@@ -435,7 +440,7 @@ const setStamp = async (
             await dlg.findElements(By.css("tr"))
         )[1].findElement(By.name("emoteId"))
     ).findElements(By.css("option"));
-    let isSetSuccess = false;
+    isSetSuccess = false;
     for (let i = 0; i < actionList.length; i++) {
         const actionElem = actionList[i];
         const actionName = await actionElem.getText();
@@ -465,7 +470,7 @@ const setStamp = async (
         }
     }
     if (!isSetSuccess) {
-        addLog(`表情 ${emoteData.action}の設定に失敗しました`);
+        addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
     /* 登録 */
     const elems = await dlg.findElements(By.css("p"));
