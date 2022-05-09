@@ -16,7 +16,7 @@
 
 ## ダウンロード
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.0/DQXChatManager-win32-x64.zip)  
+[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.1/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ## 使い方（設定出力）
