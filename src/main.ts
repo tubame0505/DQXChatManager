@@ -204,23 +204,25 @@ const getEmotePage = async (
     driver: webdriver.ThenableWebDriver,
     pageId: string
 ) => {
-    const emoteList = await driver.findElement(By.id(pageId));
-    const emotes = await emoteList.findElements(By.css("tr"));
-    if (emotes.length != 10) {
-        throw Error(`ページ読み込みエラー <emotes.length != 10>`);
-    }
     for (let i = 0; i < 10; i++) {
         const emoteData = new EmoteData();
         emoteData.pageId = pageId;
         emoteData.index = i + 1;
-        const attrs = await emotes[i].findElements(By.css("td"));
-        if (attrs.length != 6) {
-            throw Error(`ページ読み込みエラー <attrs.length != 6>`);
+        const attrs = await driver.findElements(
+            By.xpath(`//*[@id="${pageId}"]/table/tbody/tr[${i + 1}]/td`)
+        );
+        if (attrs.length < 6) {
+            throw Error(`ページ読み込みエラー <element not found>`);
         }
-        emoteData.type = await attrs[1].getText();
+        const typeElement = attrs[1];
+        const contentsElement = attrs[2];
+        const actionElement = attrs[3];
+        const faceElement = attrs[4];
+        const timingElement = attrs[5];
+        emoteData.type = await typeElement.getText();
         if (emoteData.type === "セリフ") {
-            let contents = await attrs[2]
-                .findElement(By.css("span"))
+            let contents = await contentsElement
+                .findElement(By.xpath("./a/span"))
                 .getAttribute("innerHTML");
             // 余計な文字消す
             contents = contents
@@ -232,19 +234,18 @@ const getEmotePage = async (
                 .join("");
             emoteData.contents = contents;
         } else if (emoteData.type === "スタンプ") {
-            const contents = await attrs[2]
-                .findElement(By.css("span"))
-                .findElement(By.css("img"))
+            const contents = await contentsElement
+                .findElement(By.xpath("./a/span/img"))
                 .getAttribute("src");
             const stampNo = contents.split("/")[6].split("_")[0];
-            const stampName = await attrs[2].getText();
+            const stampName = await contentsElement.getText();
             emoteData.contents = `${stampNo}_${stampName}`;
         } else {
-            emoteData.contents = await attrs[2].getText();
+            emoteData.contents = await contentsElement.getText();
         }
-        emoteData.action = await attrs[3].getText();
-        emoteData.face = await attrs[4].getText();
-        emoteData.timing = await attrs[5].getText();
+        emoteData.action = await actionElement.getText();
+        emoteData.face = await faceElement.getText();
+        emoteData.timing = await timingElement.getText();
         addEmote(emoteData.emoteToString());
     }
 };
@@ -267,20 +268,15 @@ const setEmote = async (
         return;
     }
     /* 設定ダイアログ開く */
-    const emoteList = await driver.findElement(By.id(emoteData.pageId));
-    const emotes = await emoteList.findElements(By.css("tr"));
-    if (emotes.length != 10) {
-        throw Error(
-            "ページ読み込みエラー <emotes.Count != 10>\r\n中断しました"
-        );
+    const openLink = await driver.findElement(
+        By.xpath(
+            `//*[@id="${emoteData.pageId}"]/table/tbody/tr[${emoteData.index}]/td[3]/a`
+        )
+    );
+    if (openLink === undefined) {
+        throw Error("ページ読み込みエラー <openLink>\r\n中断しました");
     }
-    const target = emotes[emoteData.index - 1];
-    const attrs = await target.findElements(By.css("td"));
-    if (attrs.length != 6) {
-        throw Error("ページ読み込みエラー <attrs.Count != 6>\r\n中断しました");
-    }
-    const link = await attrs[2].findElement(By.css("a"));
-    await link.click();
+    await openLink.click();
     await waitUntilDialog(driver);
 
     if (emoteData.type === "セリフ") {
@@ -294,202 +290,135 @@ const setDialogue = async (
     driver: webdriver.ThenableWebDriver,
     emoteData: EmoteData
 ) => {
-    /* 値を設定 */
-    const dlg = await driver.findElement(By.id("_mdlg_dlg"));
     /* ラジオボタン　→　セリフ */
-    await (
-        await (
-            await (
-                await dlg.findElements(By.css("tr"))
-            )[1].findElements(By.css("td"))
-        )[2].findElements(By.css("input"))
-    )[0].click();
+    await driver
+        .findElement(
+            By.xpath(
+                '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[1]/label/input'
+            )
+        )
+        .click();
     /* テキストエリア */
-    const contentsArea = await (
-        await (
-            await dlg.findElements(By.css("tr"))
-        )[1].findElements(By.css("td"))
-    )[3].findElement(By.css("textarea"));
+    const contentsArea = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[4]/textarea'
+        )
+    );
     await contentsArea.clear();
     if (emoteData.contents != "（なし）") {
         contentsArea.sendKeys(emoteData.contentsToKey());
     }
     /* しぐさ */
-    const actionList = await (
-        await (
-            await dlg.findElements(By.css("tr"))
-        )[1].findElement(By.name("emoteId"))
-    ).findElements(By.css("option"));
-    let isSetSuccess = false;
-    for (let i = 0; i < actionList.length; i++) {
-        const actionElem = actionList[i];
-        const actionName = await actionElem.getText();
-        if (actionName === emoteData.action) {
-            await actionElem.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const actionElem = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[5]/div[1]/select/option[contains(text(), '${emoteData.action}')]`
+        )
+    );
+    if (actionElem != undefined) {
+        actionElem.click();
+    } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
     /* 表情 */
-    const faceList = await (
-        await (
-            await dlg.findElements(By.css("tr"))
-        )[1].findElement(By.name("faceType"))
-    ).findElements(By.css("option"));
-    isSetSuccess = false;
-    for (let i = 0; i < faceList.length; i++) {
-        const actionElem = faceList[i];
-        const actionName = await actionElem.getText();
-        if (actionName === emoteData.face) {
-            await actionElem.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const faceElem = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[contains(text(), '${emoteData.face}')]`
+        )
+    );
+    if (faceElem != undefined) {
+        faceElem.click();
+    } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
     /* タイミング */
-    const timingList = await (
-        await (
-            await dlg.findElements(By.css("tr"))
-        )[1].findElement(By.name("msgTiming"))
-    ).findElements(By.css("option"));
-    isSetSuccess = false;
-    for (let i = 0; i < timingList.length; i++) {
-        const actionElem = timingList[i];
-        const actionName = await actionElem.getText();
-        if (actionName === emoteData.timing) {
-            await actionElem.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const timingElem = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[contains(text(), '${emoteData.face}')]`
+        )
+    );
+    if (timingElem != undefined) {
+        timingElem.click();
+    } else {
         addLog(`発言タイミング ${emoteData.timing}の設定に失敗しました`);
     }
     /* 登録 */
-    const elems = await dlg.findElements(By.css("p"));
-    isSetSuccess = false;
-    for (let i = 0; i < elems.length; i++) {
-        const elem = elems[i];
-        const elemClass = await elem.getAttribute("class");
-        if (elemClass === "btn-reg") {
-            const regButton = await elem.findElement(By.css("a"));
-            await regButton.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const registerButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
+        )
+    );
+    if (registerButton != undefined) {
+        registerButton.click();
+    } else {
         addLog(`登録に失敗しました`);
     }
     await waitUntilDialogClear(driver);
-    isSetSuccess = true;
 };
 
 const setStamp = async (
     driver: webdriver.ThenableWebDriver,
     emoteData: EmoteData
 ) => {
-    /* 値を設定 */
-    const dlg = await driver.findElement(By.id("_mdlg_dlg"));
     /* ラジオボタン　→　スタンプ */
-    await (
-        await (
-            await (
-                await dlg.findElements(By.css("tr"))
-            )[1].findElements(By.css("td"))
-        )[2].findElements(By.css("input"))
-    )[1].click();
+    await driver
+        .findElement(
+            By.xpath(
+                '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[2]/label/input'
+            )
+        )
+        .click();
     /* スタンプ */
-    const stampSlecterArea = await (
-        await (
-            await (
-                await dlg.findElements(By.css("tr"))
-            )[1].findElements(By.css("td"))
-        )[3].findElements(By.css("td"))
-    )[1];
-    const openButton = await stampSlecterArea.findElement(By.css("div"));
+    const openButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[4]/table/tbody/tr/td[2]/div'
+        )
+    );
     await openButton.click();
-    const stampOptions = await stampSlecterArea.findElements(By.css("div"));
     const targetStampNo = emoteData.contents.split("_")[0];
-    let isSetSuccess = false;
-    for (let i = 0; i < stampOptions.length; i++) {
-        const stampOption = stampOptions[i];
-        const className = await stampOption.getAttribute("class");
-        if (className === "dropdown-option") {
-            const button = await stampOption.findElement(By.css("a"));
-            const stampNo = await button.getAttribute("data-value");
-            if (stampNo === targetStampNo) {
-                await button.click();
-                isSetSuccess = true;
-                break;
-            }
-        }
-    }
-    if (!isSetSuccess) {
+    const stampButton = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[4]/table/tbody/tr/td[2]/div/div[2]//a[@data-value='${targetStampNo}']`
+        )
+    );
+    if (stampButton != undefined) {
+        stampButton.click();
+    } else {
         addLog(`スタンプ ${emoteData.contents}の設定に失敗しました`);
     }
     /* しぐさ */
-    const actionList = await (
-        await (
-            await dlg.findElements(By.css("tr"))
-        )[1].findElement(By.name("emoteId"))
-    ).findElements(By.css("option"));
-    isSetSuccess = false;
-    for (let i = 0; i < actionList.length; i++) {
-        const actionElem = actionList[i];
-        const actionName = await actionElem.getText();
-        if (actionName === emoteData.action) {
-            await actionElem.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const actionElem = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[5]/div[1]/select/option[contains(text(), '${emoteData.action}')]`
+        )
+    );
+    if (actionElem != undefined) {
+        actionElem.click();
+    } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
     /* 表情 */
-    const faceList = await (
-        await (
-            await dlg.findElements(By.css("tr"))
-        )[1].findElement(By.name("faceType"))
-    ).findElements(By.css("option"));
-    isSetSuccess = false;
-    for (let i = 0; i < faceList.length; i++) {
-        const actionElem = faceList[i];
-        const actionName = await actionElem.getText();
-        if (actionName === emoteData.face) {
-            await actionElem.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const faceElem = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[contains(text(), '${emoteData.face}')]`
+        )
+    );
+    if (faceElem != undefined) {
+        faceElem.click();
+    } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
     /* 登録 */
-    const elems = await dlg.findElements(By.css("p"));
-    isSetSuccess = false;
-    for (let i = 0; i < elems.length; i++) {
-        const elem = elems[i];
-        const elemClass = await elem.getAttribute("class");
-        if (elemClass === "btn-reg") {
-            const regButton = await elem.findElement(By.css("a"));
-            await regButton.click();
-            isSetSuccess = true;
-            break;
-        }
-    }
-    if (!isSetSuccess) {
+    const registerButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
+        )
+    );
+    if (registerButton != undefined) {
+        registerButton.click();
+    } else {
         addLog(`登録に失敗しました`);
     }
     await waitUntilDialogClear(driver);
-    isSetSuccess = true;
 };
 
 const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
