@@ -494,6 +494,12 @@ class EmoteData {
         return this.contents
             .split("&nbsp;")
             .join(" ")
+            .split("&amp;")
+            .join("&")
+            .split("&lt;")
+            .join("<")
+            .split("&gt;")
+            .join(">")
             .split("<br>")
             .join("\r\n");
     }
