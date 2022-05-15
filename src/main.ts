@@ -333,7 +333,7 @@ const setDialogue = async (
     /* タイミング */
     const timingElem = await driver.findElement(
         By.xpath(
-            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[contains(text(), '${emoteData.face}')]`
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[7]/div[1]/select/option[contains(text(), '${emoteData.timing}')]`
         )
     );
     if (timingElem != undefined) {
