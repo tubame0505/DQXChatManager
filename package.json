@@ -2,7 +2,7 @@
   "name": "dqx-chat-manager",
   "productName": "DQX Chat Manager",
   "description": "DQX Chat Manager",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license": "MIT",
   "author": {"name": "tubame0505"},
   "main": "dist/main.js",

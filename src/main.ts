@@ -340,7 +340,7 @@ const setDialogue = async (
     /* しぐさ */
     const actionElem = await driver.findElement(
         By.xpath(
-            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[5]/div[1]/select/option[contains(text(), '${emoteData.action}')]`
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[5]/div[1]/select/option[text()='${emoteData.action}']`
         )
     );
     if (actionElem != undefined) {
@@ -351,7 +351,7 @@ const setDialogue = async (
     /* 表情 */
     const faceElem = await driver.findElement(
         By.xpath(
-            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[contains(text(), '${emoteData.face}')]`
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[text()='${emoteData.face}']`
         )
     );
     if (faceElem != undefined) {
@@ -362,7 +362,7 @@ const setDialogue = async (
     /* タイミング */
     const timingElem = await driver.findElement(
         By.xpath(
-            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[7]/div[1]/select/option[contains(text(), '${emoteData.timing}')]`
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[7]/div[1]/select/option[text()='${emoteData.timing}']`
         )
     );
     if (timingElem != undefined) {
@@ -417,7 +417,7 @@ const setStamp = async (
     /* しぐさ */
     const actionElem = await driver.findElement(
         By.xpath(
-            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[5]/div[1]/select/option[contains(text(), '${emoteData.action}')]`
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[5]/div[1]/select/option[text()='${emoteData.action}']`
         )
     );
     if (actionElem != undefined) {
@@ -428,7 +428,7 @@ const setStamp = async (
     /* 表情 */
     const faceElem = await driver.findElement(
         By.xpath(
-            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[contains(text(), '${emoteData.face}')]`
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[6]/div[1]/select/option[text()='${emoteData.face}']`
         )
     );
     if (faceElem != undefined) {

@@ -16,7 +16,7 @@
 
 ## ダウンロード
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.5/DQXChatManager-win32-x64.zip)  
+[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.6/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ## 使い方（設定出力）
@@ -64,3 +64,8 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 -   このアプリによるブラウザ操作は[スクウェア・エニックス アカウント規約](https://support.jp.square-enix.com/rule.php?id=450&la=0&tag=sqexaccount)「第 15 条　禁止行為 (24)」に違反するものではないと考えていますが、不安な方は利用をお控えください
     > 第 15 条　禁止行為  
     > (24) 自動的に特定の行為を繰り返させるプログラムやツールを用いて対象サービスの各コンテンツや各サービス（コミュニティを含む）を利用する行為。
+
+## 更新履歴
+
+-   v0.1.5: ブラウザ画面でセリフの設定 UI が畳まれているときに動作しない不具合を修正
+-   v0.1.6: 一部のしぐさが正しく設定されない不具合を修正
