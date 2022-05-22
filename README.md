@@ -16,7 +16,7 @@
 
 ## ダウンロード
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.4/DQXChatManager-win32-x64.zip)  
+[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.5/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ## 使い方（設定出力）
@@ -52,6 +52,8 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 -   設定中の中断はできません。動きがおかしいなと思ったら、ブラウザを ✕ ボタンで閉じてください
 -   設定の不要な行を削除しておくと早く終わります
 -   他のキャラクターへの設定引っ越しなどもできるかと思いますが、動作は未確認です
+
+## 使い方　[(スプレッドシートを使った編集)](./spread-sheets.md)
 
 ## 注意事項
 

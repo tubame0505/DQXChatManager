@@ -141,7 +141,7 @@ const exportEmote = async () => {
         if (_driver != undefined) {
             for (let i = 0; i < 10; i++) {
                 addLog(`${i + 1}ページ目出力中`);
-                let pageId = `emote-list-${i}`;
+                const pageId = `emote-list-${i}`;
                 await getEmotePage(_driver, pageId);
             }
         }
@@ -204,6 +204,19 @@ const getEmotePage = async (
     driver: webdriver.ThenableWebDriver,
     pageId: string
 ) => {
+    /* リストが閉じていたら開く */
+    const pageBar = `p1${pageId.split("-")[2]}`;
+    const listHolder = await driver.findElement(
+        By.xpath(`//*[@id="${pageBar}"]`)
+    );
+    if (listHolder === undefined) {
+        throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
+    }
+    const listHolderStyle = await listHolder.getAttribute("class");
+    if (listHolderStyle.indexOf("hide") > 0) {
+        await listHolder.click();
+    }
+    // 読み込み
     for (let i = 0; i < 10; i++) {
         const emoteData = new EmoteData();
         emoteData.pageId = pageId;
@@ -266,6 +279,22 @@ const setEmote = async (
     if (emoteData.type != "セリフ" && emoteData.type != "スタンプ") {
         addLog("セリフ・スタンプ以外のためスキップします");
         return;
+    }
+    /* リストが閉じていたら開く */
+    const pageBar = `p1${emoteData.pageId.split("-")[2]}`;
+    const listHolder = await driver.findElement(
+        By.xpath(`//*[@id="${pageBar}"]`)
+    );
+    if (listHolder === undefined) {
+        throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
+    }
+    const listHolderStyle = await listHolder.getAttribute("class");
+    if (listHolderStyle.indexOf("hide") > 0) {
+        await listHolder.click();
+        await waitUntilListOpen(
+            driver,
+            `//*[@id="${emoteData.pageId}"]/table/tbody/tr[${emoteData.index}]/td[3]/a`
+        );
     }
     /* 設定ダイアログ開く */
     const openLink = await driver.findElement(
@@ -421,10 +450,42 @@ const setStamp = async (
     await waitUntilDialogClear(driver);
 };
 
+const waitUntilListOpen = async (
+    driver: webdriver.ThenableWebDriver,
+    xpath: string
+) => {
+    await driver.wait(async () => {
+        try {
+            const list = await driver
+                .findElement(By.xpath(xpath))
+                .catch((e) => {
+                    return undefined;
+                });
+            if (list === undefined) {
+                return false;
+            }
+            const visible = await list.isDisplayed();
+            if (!visible) {
+                return false;
+            }
+        } catch (error) {
+            return false;
+        }
+        return true;
+    }, 3000);
+};
+
 const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
     await driver.wait(async () => {
         try {
-            const dlg = await driver.findElement(By.id("_mdlg_dlg"));
+            const dlg = await driver
+                .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                .catch((e) => {
+                    return undefined;
+                });
+            if (dlg === undefined) {
+                return false;
+            }
             const visible = await dlg.isDisplayed();
             if (!visible) {
                 return false;
@@ -450,7 +511,14 @@ const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
 const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
     await driver.wait(async () => {
         try {
-            const dlg = await driver.findElement(By.id("_mdlg_dlg"));
+            const dlg = await driver
+                .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                .catch((e) => {
+                    return undefined;
+                });
+            if (dlg === undefined) {
+                return true;
+            }
             const visible = await dlg.isDisplayed();
             if (!visible) {
                 return true;
