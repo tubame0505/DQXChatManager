@@ -1,7 +1,7 @@
 ## 使い方（スプレッドシートでの利用）
 
--   Excel や[Google sheets](https://www.google.com/intl/ja_jp/sheets/about/)に貼り付けて編集ができます
--   ゲーム内でやると面倒な編集が簡単にできます
+-   Excel や[Google sheets](https://www.google.com/intl/ja_jp/sheets/about/)に貼り付けて編集後に取り込みができます
+-   ゲーム内やブラウザ画面でやると面倒な編集が簡単にできます
 
     ![](./media/screen11.png)
 
