@@ -19,6 +19,16 @@
 [ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.6/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
+![](./media/screen14.png)
+
+### Windows によって PC が保護されましたという表示が出た場合
+
+![](./media/screen15.png)
+
+ZIP ファイルの展開の仕方によって出る場合があります  
+リンク先の画面を参考に、「詳細情報」→「実行」と操作してください  
+[操作方法（Buffalo 社サイトへリンク）](https://www.buffalo.jp/support/faq/detail/124145337.html)
+
 ## 使い方（設定出力）
 
 -   初回起動時に画像のような画面が出るので ✕ で消すかキャンセルしてください。許可を押す必要はありません。
