@@ -1,1 +1,4 @@
-theme: jekyll-theme-cayman
+remote_theme: chrisrhymes/bulma-clean-theme
+google_analytics: G-KRYJVSML8Z
+plugins:
+    - jekyll-sitemap
