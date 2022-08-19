@@ -3,7 +3,7 @@
 ## はじめに
 
 -   DQX のよく使うセリフを管理するアプリです
--   現在の設定をPCへ保存したり、保存した状態を復元できます
+-   現在の設定を PC へ保存したり、保存した状態を復元できます
 -   [Edge](https://www.microsoft.com/ja-jp/edge)がインストールされた Windows PC が必要です（普通は入っていると思います）
 -   Mac/スマホなどでは動作しません
 -   このページの内容をよく読み理解できる方のみ使用願います
@@ -17,7 +17,7 @@
 
 ## ダウンロード
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.6/DQXChatManager-win32-x64.zip)  
+[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.7/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ![](./media/screen14.png)
@@ -80,3 +80,4 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 
 -   v0.1.5: ブラウザ画面でセリフの設定 UI が畳まれているときに動作しない不具合を修正
 -   v0.1.6: 一部のしぐさが正しく設定されない不具合を修正
+-   v0.1.7: 取り込み時ランダムにエラーが出る不具合を修正
