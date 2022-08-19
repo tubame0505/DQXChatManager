@@ -206,8 +206,9 @@ const getEmotePage = async (
 ) => {
     /* リストが閉じていたら開く */
     const pageBar = `p1${pageId.split("-")[2]}`;
-    const listHolder = await driver.findElement(
-        By.xpath(`//*[@id="${pageBar}"]`)
+    const listHolder = await driver.wait(
+        webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
+        6000
     );
     if (listHolder === undefined) {
         throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
@@ -282,8 +283,9 @@ const setEmote = async (
     }
     /* リストが閉じていたら開く */
     const pageBar = `p1${emoteData.pageId.split("-")[2]}`;
-    const listHolder = await driver.findElement(
-        By.xpath(`//*[@id="${pageBar}"]`)
+    const listHolder = await driver.wait(
+        webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
+        6000
     );
     if (listHolder === undefined) {
         throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
@@ -472,7 +474,7 @@ const waitUntilListOpen = async (
             return false;
         }
         return true;
-    }, 3000);
+    }, 6000);
 };
 
 const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
@@ -505,7 +507,7 @@ const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
             return false;
         }
         return true;
-    }, 3000);
+    }, 6000);
 };
 
 const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
