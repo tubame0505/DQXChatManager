@@ -43,16 +43,32 @@ export class DriverDownloader {
             };
         }
         // Check downloadad?
+        const driverBasePath = path.join(basePath, "win64");
         const driverPath = this.getDriverPath(basePath, version);
         const driverDir = path.dirname(driverPath);
         const url = `${CDN_URL}/${version}/edgedriver_win64.zip`;
         try {
             if (this.isDriverInstalled(basePath, version)) {
                 return { path: driverPath, error: undefined };
-            } else {
-                fs.mkdirSync(driverDir, { recursive: true });
             }
+            // remove old driver
+            const dirs = fs.readdirSync(driverBasePath).filter((file) => {
+                return fs
+                    .statSync(path.join(driverBasePath, file))
+                    .isDirectory();
+            });
+            dirs.forEach((dir) => {
+                try {
+                    fs.rmSync(path.join(driverBasePath, dir), {
+                        recursive: true,
+                        force: true,
+                    });
+                } catch {
+                    // nop
+                }
+            });
             // download
+            fs.mkdirSync(driverDir, { recursive: true });
             const response = await axios.default.get(url, {
                 responseType: "arraybuffer",
             });
