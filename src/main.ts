@@ -208,7 +208,8 @@ const getEmotePage = async (
     const pageBar = `p1${pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
         webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
-        6000
+        12000,
+        `error on waiting //*[@id="${pageBar}"]: `
     );
     if (listHolder === undefined) {
         throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
@@ -285,7 +286,8 @@ const setEmote = async (
     const pageBar = `p1${emoteData.pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
         webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
-        6000
+        12000,
+        `error on waiting //*[@id="${pageBar}"]`
     );
     if (listHolder === undefined) {
         throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
@@ -456,80 +458,92 @@ const waitUntilListOpen = async (
     driver: webdriver.ThenableWebDriver,
     xpath: string
 ) => {
-    await driver.wait(async () => {
-        try {
-            const list = await driver
-                .findElement(By.xpath(xpath))
-                .catch((e) => {
-                    return undefined;
-                });
-            if (list === undefined) {
+    await driver.wait(
+        async () => {
+            try {
+                const list = await driver
+                    .findElement(By.xpath(xpath))
+                    .catch((e) => {
+                        return undefined;
+                    });
+                if (list === undefined) {
+                    return false;
+                }
+                const visible = await list.isDisplayed();
+                if (!visible) {
+                    return false;
+                }
+            } catch (error) {
                 return false;
             }
-            const visible = await list.isDisplayed();
-            if (!visible) {
-                return false;
-            }
-        } catch (error) {
-            return false;
-        }
-        return true;
-    }, 6000);
+            return true;
+        },
+        12000,
+        "error on waitUntilListOpen()"
+    );
 };
 
 const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
-    await driver.wait(async () => {
-        try {
-            const dlg = await driver
-                .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
-                .catch((e) => {
-                    return undefined;
-                });
-            if (dlg === undefined) {
+    await driver.wait(
+        async () => {
+            try {
+                const dlg = await driver
+                    .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                    .catch((e) => {
+                        return undefined;
+                    });
+                if (dlg === undefined) {
+                    return false;
+                }
+                const visible = await dlg.isDisplayed();
+                if (!visible) {
+                    return false;
+                }
+            } catch (error) {
                 return false;
             }
-            const visible = await dlg.isDisplayed();
-            if (!visible) {
+            try {
+                const form = await driver.findElement(
+                    By.name("preferenceActionForm")
+                );
+                const visible = await form.isDisplayed();
+                if (!visible) {
+                    return false;
+                }
+            } catch (error) {
                 return false;
             }
-        } catch (error) {
-            return false;
-        }
-        try {
-            const form = await driver.findElement(
-                By.name("preferenceActionForm")
-            );
-            const visible = await form.isDisplayed();
-            if (!visible) {
-                return false;
-            }
-        } catch (error) {
-            return false;
-        }
-        return true;
-    }, 6000);
+            return true;
+        },
+        12000,
+        "error on waitUntilDialog()"
+    );
 };
 
 const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
-    await driver.wait(async () => {
-        try {
-            const dlg = await driver
-                .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
-                .catch((e) => {
-                    return undefined;
-                });
-            if (dlg === undefined) {
+    await driver.wait(
+        async () => {
+            try {
+                const dlg = await driver
+                    .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                    .catch((e) => {
+                        return undefined;
+                    });
+                if (dlg === undefined) {
+                    return true;
+                }
+                const visible = await dlg.isDisplayed();
+                if (!visible) {
+                    return true;
+                }
+                return false;
+            } catch (error) {
                 return true;
             }
-            const visible = await dlg.isDisplayed();
-            if (!visible) {
-                return true;
-            }
-            return false;
-        } catch (error) {
-            return true;
-        }
-    }, 3000);
+        },
+        12000,
+        "waitUntilDialogClear()"
+    );
 };
 
 class EmoteData {
