@@ -48,6 +48,7 @@ export class DriverDownloader {
         const driverDir = path.dirname(driverPath);
         const url = `${CDN_URL}/${version}/edgedriver_win64.zip`;
         try {
+            fs.mkdirSync(driverBasePath, { recursive: true });
             if (this.isDriverInstalled(basePath, version)) {
                 return { path: driverPath, error: undefined };
             }
