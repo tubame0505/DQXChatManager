@@ -186,18 +186,33 @@ const importEmote = async (emote: string) => {
     // 動作開始
     _isBusy = true;
     addLog("取り込み開始");
+    let error_count = 0;
     const settings = emote.split("\r").join("").split("\n");
     for (const setting of settings) {
-        try {
-            if (setting.length > 0) {
-                await setEmote(_driver, setting);
+        let max_retry = 5;
+        let last_error: unknown = undefined;
+        while (max_retry > 0) {
+            max_retry -= 1;
+            try {
+                if (setting.length > 0) {
+                    await setEmote(_driver, setting);
+                }
+                break;
+            } catch (error) {
+                last_error = error;
             }
-        } catch (error) {
-            addLog(`エラーが発生しました ${error}`);
+        }
+        if (max_retry == 0) {
+            addLog(`エラーが発生しました ${last_error}`);
+            error_count += 1;
         }
     }
     _isBusy = false;
-    addLog("完了");
+    if (error_count == 0) {
+        addLog("正常に完了しました");
+    } else {
+        addLog(`完了 (エラーが ${error_count}件ありました)`);
+    }
 };
 
 const getEmotePage = async (
@@ -208,7 +223,7 @@ const getEmotePage = async (
     const pageBar = `p1${pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
         webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
-        12000,
+        6000,
         `error on waiting //*[@id="${pageBar}"]: `
     );
     if (listHolder === undefined) {
@@ -286,7 +301,7 @@ const setEmote = async (
     const pageBar = `p1${emoteData.pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
         webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
-        12000,
+        6000,
         `error on waiting //*[@id="${pageBar}"]`
     );
     if (listHolder === undefined) {
@@ -478,7 +493,7 @@ const waitUntilListOpen = async (
             }
             return true;
         },
-        12000,
+        6000,
         "error on waitUntilListOpen()"
     );
 };
@@ -515,7 +530,7 @@ const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
             }
             return true;
         },
-        12000,
+        6000,
         "error on waitUntilDialog()"
     );
 };
@@ -541,7 +556,7 @@ const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
                 return true;
             }
         },
-        12000,
+        6000,
         "waitUntilDialogClear()"
     );
 };
