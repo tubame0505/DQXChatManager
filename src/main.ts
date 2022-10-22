@@ -362,7 +362,7 @@ const setDialogue = async (
         )
     );
     if (actionElem != undefined) {
-        await driver.executeScript("arguments[0].click()", actionElem);
+        await actionElem.click();
     } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
@@ -373,7 +373,7 @@ const setDialogue = async (
         )
     );
     if (faceElem != undefined) {
-        await driver.executeScript("arguments[0].click()", faceElem);
+        await faceElem.click();
     } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
@@ -384,7 +384,7 @@ const setDialogue = async (
         )
     );
     if (timingElem != undefined) {
-        await driver.executeScript("arguments[0].click()", timingElem);
+        await timingElem.click();
     } else {
         addLog(`発言タイミング ${emoteData.timing}の設定に失敗しました`);
     }
@@ -438,7 +438,7 @@ const setStamp = async (
         )
     );
     if (actionElem != undefined) {
-        await driver.executeScript("arguments[0].click()", actionElem);
+        await actionElem.click();
     } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
@@ -449,7 +449,7 @@ const setStamp = async (
         )
     );
     if (faceElem != undefined) {
-        await driver.executeScript("arguments[0].click()", faceElem);
+        await faceElem.click();
     } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
