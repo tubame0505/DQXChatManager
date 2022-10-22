@@ -231,7 +231,7 @@ const getEmotePage = async (
     }
     const listHolderStyle = await listHolder.getAttribute("class");
     if (listHolderStyle.indexOf("hide") > 0) {
-        await listHolder.click();
+        await driver.executeScript("arguments[0].click()", listHolder);
     }
     // 読み込み
     for (let i = 0; i < 10; i++) {
@@ -309,7 +309,7 @@ const setEmote = async (
     }
     const listHolderStyle = await listHolder.getAttribute("class");
     if (listHolderStyle.indexOf("hide") > 0) {
-        await listHolder.click();
+        await driver.executeScript("arguments[0].click()", listHolder);
         await waitUntilListOpen(
             driver,
             `//*[@id="${emoteData.pageId}"]/table/tbody/tr[${emoteData.index}]/td[3]/a`
@@ -324,7 +324,7 @@ const setEmote = async (
     if (openLink === undefined) {
         throw Error("ページ読み込みエラー <openLink>\r\n中断しました");
     }
-    await openLink.click();
+    await driver.executeScript("arguments[0].click()", openLink);
     await waitUntilDialog(driver);
 
     if (emoteData.type === "セリフ") {
@@ -339,13 +339,12 @@ const setDialogue = async (
     emoteData: EmoteData
 ) => {
     /* ラジオボタン　→　セリフ */
-    await driver
-        .findElement(
-            By.xpath(
-                '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[1]/label/input'
-            )
+    const rButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[1]/label/input'
         )
-        .click();
+    );
+    await driver.executeScript("arguments[0].click()", rButton);
     /* テキストエリア */
     const contentsArea = await driver.findElement(
         By.xpath(
@@ -363,7 +362,7 @@ const setDialogue = async (
         )
     );
     if (actionElem != undefined) {
-        actionElem.click();
+        await driver.executeScript("arguments[0].click()", actionElem);
     } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
@@ -374,7 +373,7 @@ const setDialogue = async (
         )
     );
     if (faceElem != undefined) {
-        faceElem.click();
+        await driver.executeScript("arguments[0].click()", faceElem);
     } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
@@ -385,7 +384,7 @@ const setDialogue = async (
         )
     );
     if (timingElem != undefined) {
-        timingElem.click();
+        await driver.executeScript("arguments[0].click()", timingElem);
     } else {
         addLog(`発言タイミング ${emoteData.timing}の設定に失敗しました`);
     }
@@ -396,7 +395,7 @@ const setDialogue = async (
         )
     );
     if (registerButton != undefined) {
-        registerButton.click();
+        await driver.executeScript("arguments[0].click()", registerButton);
     } else {
         addLog(`登録に失敗しました`);
     }
@@ -408,20 +407,19 @@ const setStamp = async (
     emoteData: EmoteData
 ) => {
     /* ラジオボタン　→　スタンプ */
-    await driver
-        .findElement(
-            By.xpath(
-                '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[2]/label/input'
-            )
+    const rButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[2]/label/input'
         )
-        .click();
+    );
+    await driver.executeScript("arguments[0].click()", rButton);
     /* スタンプ */
     const openButton = await driver.findElement(
         By.xpath(
             '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[4]/table/tbody/tr/td[2]/div'
         )
     );
-    await openButton.click();
+    await driver.executeScript("arguments[0].click()", openButton);
     const targetStampNo = emoteData.contents.split("_")[0];
     const stampButton = await driver.findElement(
         By.xpath(
@@ -429,7 +427,7 @@ const setStamp = async (
         )
     );
     if (stampButton != undefined) {
-        stampButton.click();
+        await driver.executeScript("arguments[0].click()", stampButton);
     } else {
         addLog(`スタンプ ${emoteData.contents}の設定に失敗しました`);
     }
@@ -440,7 +438,7 @@ const setStamp = async (
         )
     );
     if (actionElem != undefined) {
-        actionElem.click();
+        await driver.executeScript("arguments[0].click()", actionElem);
     } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
@@ -451,7 +449,7 @@ const setStamp = async (
         )
     );
     if (faceElem != undefined) {
-        faceElem.click();
+        await driver.executeScript("arguments[0].click()", faceElem);
     } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
@@ -462,7 +460,7 @@ const setStamp = async (
         )
     );
     if (registerButton != undefined) {
-        registerButton.click();
+        await driver.executeScript("arguments[0].click()", registerButton);
     } else {
         addLog(`登録に失敗しました`);
     }
