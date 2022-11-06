@@ -17,7 +17,7 @@
 
 ## ダウンロード
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.7/DQXChatManager-win32-x64.zip)  
+[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.8/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ![](./media/screen14.png)
@@ -81,3 +81,4 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 -   v0.1.5: ブラウザ画面でセリフの設定 UI が畳まれているときに動作しない不具合を修正
 -   v0.1.6: 一部のしぐさが正しく設定されない不具合を修正
 -   v0.1.7: 取り込み時ランダムにエラーが出る不具合を修正
+-   v0.1.8: 取り込みエラー時リトライをする機能を追加
