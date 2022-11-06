@@ -186,18 +186,33 @@ const importEmote = async (emote: string) => {
     // 動作開始
     _isBusy = true;
     addLog("取り込み開始");
+    let error_count = 0;
     const settings = emote.split("\r").join("").split("\n");
     for (const setting of settings) {
-        try {
-            if (setting.length > 0) {
-                await setEmote(_driver, setting);
+        let max_retry = 5;
+        let last_error: unknown = undefined;
+        while (max_retry > 0) {
+            max_retry -= 1;
+            try {
+                if (setting.length > 0) {
+                    await setEmote(_driver, setting);
+                }
+                break;
+            } catch (error) {
+                last_error = error;
             }
-        } catch (error) {
-            addLog(`エラーが発生しました ${error}`);
+        }
+        if (max_retry == 0) {
+            addLog(`エラーが発生しました ${last_error}`);
+            error_count += 1;
         }
     }
     _isBusy = false;
-    addLog("完了");
+    if (error_count == 0) {
+        addLog("正常に完了しました");
+    } else {
+        addLog(`完了 (エラーが ${error_count}件ありました)`);
+    }
 };
 
 const getEmotePage = async (
@@ -208,14 +223,15 @@ const getEmotePage = async (
     const pageBar = `p1${pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
         webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
-        6000
+        6000,
+        `error on waiting //*[@id="${pageBar}"]: `
     );
     if (listHolder === undefined) {
         throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
     }
     const listHolderStyle = await listHolder.getAttribute("class");
     if (listHolderStyle.indexOf("hide") > 0) {
-        await listHolder.click();
+        await driver.executeScript("arguments[0].click()", listHolder);
     }
     // 読み込み
     for (let i = 0; i < 10; i++) {
@@ -285,14 +301,15 @@ const setEmote = async (
     const pageBar = `p1${emoteData.pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
         webdriver.until.elementLocated(By.xpath(`//*[@id="${pageBar}"]`)),
-        6000
+        6000,
+        `error on waiting //*[@id="${pageBar}"]`
     );
     if (listHolder === undefined) {
         throw Error(`ページ読み込みエラー <element not found>\r\n中断しました`);
     }
     const listHolderStyle = await listHolder.getAttribute("class");
     if (listHolderStyle.indexOf("hide") > 0) {
-        await listHolder.click();
+        await driver.executeScript("arguments[0].click()", listHolder);
         await waitUntilListOpen(
             driver,
             `//*[@id="${emoteData.pageId}"]/table/tbody/tr[${emoteData.index}]/td[3]/a`
@@ -307,7 +324,7 @@ const setEmote = async (
     if (openLink === undefined) {
         throw Error("ページ読み込みエラー <openLink>\r\n中断しました");
     }
-    await openLink.click();
+    await driver.executeScript("arguments[0].click()", openLink);
     await waitUntilDialog(driver);
 
     if (emoteData.type === "セリフ") {
@@ -322,13 +339,12 @@ const setDialogue = async (
     emoteData: EmoteData
 ) => {
     /* ラジオボタン　→　セリフ */
-    await driver
-        .findElement(
-            By.xpath(
-                '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[1]/label/input'
-            )
+    const rButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[1]/label/input'
         )
-        .click();
+    );
+    await driver.executeScript("arguments[0].click()", rButton);
     /* テキストエリア */
     const contentsArea = await driver.findElement(
         By.xpath(
@@ -346,7 +362,7 @@ const setDialogue = async (
         )
     );
     if (actionElem != undefined) {
-        actionElem.click();
+        await actionElem.click();
     } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
@@ -357,7 +373,7 @@ const setDialogue = async (
         )
     );
     if (faceElem != undefined) {
-        faceElem.click();
+        await faceElem.click();
     } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
@@ -368,7 +384,7 @@ const setDialogue = async (
         )
     );
     if (timingElem != undefined) {
-        timingElem.click();
+        await timingElem.click();
     } else {
         addLog(`発言タイミング ${emoteData.timing}の設定に失敗しました`);
     }
@@ -379,7 +395,7 @@ const setDialogue = async (
         )
     );
     if (registerButton != undefined) {
-        registerButton.click();
+        await driver.executeScript("arguments[0].click()", registerButton);
     } else {
         addLog(`登録に失敗しました`);
     }
@@ -391,20 +407,19 @@ const setStamp = async (
     emoteData: EmoteData
 ) => {
     /* ラジオボタン　→　スタンプ */
-    await driver
-        .findElement(
-            By.xpath(
-                '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[2]/label/input'
-            )
+    const rButton = await driver.findElement(
+        By.xpath(
+            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[2]/label/input'
         )
-        .click();
+    );
+    await driver.executeScript("arguments[0].click()", rButton);
     /* スタンプ */
     const openButton = await driver.findElement(
         By.xpath(
             '//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[4]/table/tbody/tr/td[2]/div'
         )
     );
-    await openButton.click();
+    await driver.executeScript("arguments[0].click()", openButton);
     const targetStampNo = emoteData.contents.split("_")[0];
     const stampButton = await driver.findElement(
         By.xpath(
@@ -412,7 +427,7 @@ const setStamp = async (
         )
     );
     if (stampButton != undefined) {
-        stampButton.click();
+        await driver.executeScript("arguments[0].click()", stampButton);
     } else {
         addLog(`スタンプ ${emoteData.contents}の設定に失敗しました`);
     }
@@ -423,7 +438,7 @@ const setStamp = async (
         )
     );
     if (actionElem != undefined) {
-        actionElem.click();
+        await actionElem.click();
     } else {
         addLog(`しぐさ ${emoteData.action}の設定に失敗しました`);
     }
@@ -434,7 +449,7 @@ const setStamp = async (
         )
     );
     if (faceElem != undefined) {
-        faceElem.click();
+        await faceElem.click();
     } else {
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
@@ -445,7 +460,7 @@ const setStamp = async (
         )
     );
     if (registerButton != undefined) {
-        registerButton.click();
+        await driver.executeScript("arguments[0].click()", registerButton);
     } else {
         addLog(`登録に失敗しました`);
     }
@@ -456,80 +471,92 @@ const waitUntilListOpen = async (
     driver: webdriver.ThenableWebDriver,
     xpath: string
 ) => {
-    await driver.wait(async () => {
-        try {
-            const list = await driver
-                .findElement(By.xpath(xpath))
-                .catch((e) => {
-                    return undefined;
-                });
-            if (list === undefined) {
+    await driver.wait(
+        async () => {
+            try {
+                const list = await driver
+                    .findElement(By.xpath(xpath))
+                    .catch((e) => {
+                        return undefined;
+                    });
+                if (list === undefined) {
+                    return false;
+                }
+                const visible = await list.isDisplayed();
+                if (!visible) {
+                    return false;
+                }
+            } catch (error) {
                 return false;
             }
-            const visible = await list.isDisplayed();
-            if (!visible) {
-                return false;
-            }
-        } catch (error) {
-            return false;
-        }
-        return true;
-    }, 6000);
+            return true;
+        },
+        6000,
+        "error on waitUntilListOpen()"
+    );
 };
 
 const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
-    await driver.wait(async () => {
-        try {
-            const dlg = await driver
-                .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
-                .catch((e) => {
-                    return undefined;
-                });
-            if (dlg === undefined) {
+    await driver.wait(
+        async () => {
+            try {
+                const dlg = await driver
+                    .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                    .catch((e) => {
+                        return undefined;
+                    });
+                if (dlg === undefined) {
+                    return false;
+                }
+                const visible = await dlg.isDisplayed();
+                if (!visible) {
+                    return false;
+                }
+            } catch (error) {
                 return false;
             }
-            const visible = await dlg.isDisplayed();
-            if (!visible) {
+            try {
+                const form = await driver.findElement(
+                    By.name("preferenceActionForm")
+                );
+                const visible = await form.isDisplayed();
+                if (!visible) {
+                    return false;
+                }
+            } catch (error) {
                 return false;
             }
-        } catch (error) {
-            return false;
-        }
-        try {
-            const form = await driver.findElement(
-                By.name("preferenceActionForm")
-            );
-            const visible = await form.isDisplayed();
-            if (!visible) {
-                return false;
-            }
-        } catch (error) {
-            return false;
-        }
-        return true;
-    }, 6000);
+            return true;
+        },
+        6000,
+        "error on waitUntilDialog()"
+    );
 };
 
 const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
-    await driver.wait(async () => {
-        try {
-            const dlg = await driver
-                .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
-                .catch((e) => {
-                    return undefined;
-                });
-            if (dlg === undefined) {
+    await driver.wait(
+        async () => {
+            try {
+                const dlg = await driver
+                    .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                    .catch((e) => {
+                        return undefined;
+                    });
+                if (dlg === undefined) {
+                    return true;
+                }
+                const visible = await dlg.isDisplayed();
+                if (!visible) {
+                    return true;
+                }
+                return false;
+            } catch (error) {
                 return true;
             }
-            const visible = await dlg.isDisplayed();
-            if (!visible) {
-                return true;
-            }
-            return false;
-        } catch (error) {
-            return true;
-        }
-    }, 3000);
+        },
+        6000,
+        "waitUntilDialogClear()"
+    );
 };
 
 class EmoteData {
