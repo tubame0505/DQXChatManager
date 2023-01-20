@@ -10,6 +10,7 @@ export const App = () => {
     const stateareaRef = useRef<HTMLTextAreaElement>(null);
     const [emoteData, setEmoteData] = useState("");
     const [stateData, setStateData] = useState("広場ログインしてください\r\n");
+    const [profile, setProfile] = useState("");
 
     const onTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setEmoteData(event.currentTarget.value);
@@ -39,7 +40,7 @@ export const App = () => {
         stateareaRef.current?.blur();
     };
     const onLogin = () => {
-        myAPI.login();
+        myAPI.login(profile);
     };
     const onExport = () => {
         setEmoteData((emoteData) => ""); // Clear
@@ -47,6 +48,9 @@ export const App = () => {
     };
     const onImport = () => {
         myAPI.import(emoteData);
+    };
+    const onSelectProfile = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setProfile(event.target.value);
     };
     const messageListener = (target: string, message: string): void => {
         if (target === "log") {
@@ -64,6 +68,13 @@ export const App = () => {
         <div className="container">
             <div>
                 <button onClick={onLogin}>広場ログイン</button>
+                <select value={profile} onChange={onSelectProfile}>
+                    <option value="">No Profile</option>
+                    <option value="Profile1">Profile1</option>
+                    <option value="Profile2">Profile2</option>
+                    <option value="Profile3">Profile3</option>
+                    <option value="Profile4">Profile4</option>
+                </select>
                 <button onClick={onExport}>設定をテキストへ出力</button>
                 <button onClick={onImport}>設定をテキストから取り込み</button>
             </div>
