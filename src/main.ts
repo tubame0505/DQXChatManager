@@ -1,5 +1,6 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
 import path from "path";
+import * as fs from "fs";
 import { searchDevtools } from "electron-search-devtools";
 import { BrowserWindow, app, ipcMain, session, dialog } from "electron";
 import { DriverDownloader } from "./driver_downloader";
@@ -13,17 +14,6 @@ let _mainWindow: BrowserWindow | undefined;
 let _driver: webdriver.ThenableWebDriver | undefined;
 let _isBusy: boolean = false;
 
-if (isDev) {
-    const execPath =
-        process.platform === "win32"
-            ? "../node_modules/electron/dist/electron.exe"
-            : "../node_modules/.bin/electron";
-
-    require("electron-reload")(__dirname, {
-        electron: path.resolve(__dirname, execPath),
-    });
-}
-
 const createWindow = () => {
     const mainWindow = new BrowserWindow({
         webPreferences: {
@@ -33,7 +23,7 @@ const createWindow = () => {
     _mainWindow = mainWindow;
     _mainWindow.setMenu(null);
 
-    ipcMain.on("login", async (_e) => {
+    ipcMain.on("login", async (_e, profile: string) => {
         addLog("check driver.");
         const downloader = new DriverDownloader();
         await downloader.getBrowserVersion();
@@ -48,7 +38,7 @@ const createWindow = () => {
         const driver = await downloader.getDriver(__dirname, edgeVersion);
         if (driver.path != undefined) {
             addLog(`edge driver ${edgeVersion} installed.`);
-            login(driver.path);
+            login(driver.path, profile);
         } else {
             addLog(`edge driver install error. ${driver.error}`);
         }
@@ -102,13 +92,22 @@ const dispose = () => {
     }
 };
 
-const login = async (driverPath: string) => {
+const login = async (driverPath: string, profile: string) => {
     addLog("広場ログイン開始");
+    let profilePath = "";
+    if (profile.length > 0) {
+        addLog(`Profile=${profile}`);
+        profilePath = path.join(__dirname, "profiles", profile);
+        fs.mkdirSync(profilePath, { recursive: true });
+    }
     try {
         dispose();
         const service = new edge.ServiceBuilder(driverPath);
         const edgeOptions = new edge.Options();
-        await edgeOptions.windowSize({ width: 1000, height: 1200 });
+        edgeOptions.windowSize({ width: 1000, height: 1200 });
+        if (profilePath.length > 0) {
+            edgeOptions.addArguments(`--user-data-dir=${profilePath}`);
+        }
         const driver = new Builder()
             .forBrowser("MicrosoftEdge")
             .setEdgeOptions(edgeOptions)

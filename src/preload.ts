@@ -3,7 +3,7 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
 contextBridge.exposeInMainWorld("myAPI", {
     update: (count: number) => ipcRenderer.send("update-title", count),
-    login: () => ipcRenderer.send("login"),
+    login: (profile: string) => ipcRenderer.send("login", profile),
     export: () => ipcRenderer.send("export"),
     import: (emote: string) => ipcRenderer.send("import", emote),
     onReceiveMessage: (listener: (target: string, message: string) => void) => {

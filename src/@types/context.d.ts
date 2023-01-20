@@ -1,6 +1,6 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
 export interface IElectronAPI {
-    login: () => void;
+    login: (profile: string) => void;
     export: () => void;
     import: (emoteData: string) => void;
     onReceiveMessage: (
