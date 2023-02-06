@@ -199,6 +199,7 @@ const importEmote = async (emote: string) => {
                 break;
             } catch (error) {
                 last_error = error;
+                registerOrCancelAndDialogClear(_driver, false);
             }
         }
         if (max_retry == 0) {
@@ -418,17 +419,7 @@ const setDialogue = async (
         addLog(`発言タイミング ${emoteData.timing}の設定に失敗しました`);
     }
     /* 登録 */
-    const registerButton = await driver.findElement(
-        By.xpath(
-            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
-        )
-    );
-    if (registerButton != undefined) {
-        await driver.executeScript("arguments[0].click()", registerButton);
-    } else {
-        addLog(`登録に失敗しました`);
-    }
-    await waitUntilDialogClear(driver);
+    await registerOrCancelAndDialogClear(driver, true);
 };
 
 const setStamp = async (
@@ -483,17 +474,7 @@ const setStamp = async (
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
     /* 登録 */
-    const registerButton = await driver.findElement(
-        By.xpath(
-            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
-        )
-    );
-    if (registerButton != undefined) {
-        await driver.executeScript("arguments[0].click()", registerButton);
-    } else {
-        addLog(`登録に失敗しました`);
-    }
-    await waitUntilDialogClear(driver);
+    await registerOrCancelAndDialogClear(driver, true);
 };
 
 const setOthers = async (
@@ -521,17 +502,7 @@ const setOthers = async (
         addLog(`${emoteData.type} ${emoteData.contents}の設定に失敗しました`);
     }
     /* 登録 */
-    const registerButton = await driver.findElement(
-        By.xpath(
-            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
-        )
-    );
-    if (registerButton != undefined) {
-        await driver.executeScript("arguments[0].click()", registerButton);
-    } else {
-        addLog(`登録に失敗しました`);
-    }
-    await waitUntilDialogClear(driver);
+    await registerOrCancelAndDialogClear(driver, true);
 };
 
 const waitUntilListOpen = async (
@@ -600,30 +571,59 @@ const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
     );
 };
 
-const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
-    await driver.wait(
-        async () => {
-            try {
-                const dlg = await driver
-                    .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
-                    .catch((e) => {
-                        return undefined;
-                    });
-                if (dlg === undefined) {
-                    return true;
-                }
-                const visible = await dlg.isDisplayed();
-                if (!visible) {
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                return true;
-            }
-        },
-        6000,
-        "waitUntilDialogClear()"
-    );
+const registerOrCancelAndDialogClear = async (
+    driver: webdriver.ThenableWebDriver,
+    isRegister: boolean
+) => {
+    let max_retry = 5;
+    let last_error: unknown = undefined;
+    while (max_retry > 0) {
+        max_retry -= 1;
+        const buttonNumber = isRegister ? 3 : 1;
+        const registerOrCancelButton = await driver.findElement(
+            By.xpath(
+                `//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[${buttonNumber}]/p/a`
+            )
+        );
+        if (registerOrCancelButton != undefined) {
+            await driver.executeScript(
+                "arguments[0].click()",
+                registerOrCancelButton
+            );
+        } else {
+            return;
+        }
+
+        try {
+            await driver.wait(
+                async () => {
+                    try {
+                        const dlg = await driver
+                            .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                            .catch((e) => {
+                                return undefined;
+                            });
+                        if (dlg === undefined) {
+                            return true;
+                        }
+                        const visible = await dlg.isDisplayed();
+                        if (!visible) {
+                            return true;
+                        }
+                        return false;
+                    } catch (error) {
+                        return true;
+                    }
+                },
+                6000,
+                "waitUntilDialogClear()"
+            );
+            return;
+        } catch (error) {
+            last_error = error;
+        }
+    }
+    throw last_error;
 };
 
 class EmoteData {
