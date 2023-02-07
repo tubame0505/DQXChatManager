@@ -199,6 +199,7 @@ const importEmote = async (emote: string) => {
                 break;
             } catch (error) {
                 last_error = error;
+                registerOrCancelAndDialogClear(_driver, false);
             }
         }
         if (max_retry == 0) {
@@ -212,6 +213,55 @@ const importEmote = async (emote: string) => {
     } else {
         addLog(`完了 (エラーが ${error_count}件ありました)`);
     }
+};
+
+const getOneEmote = async (
+    driver: webdriver.ThenableWebDriver,
+    pageId: string,
+    index: number
+) => {
+    const emoteData = new EmoteData();
+    emoteData.pageId = pageId;
+    emoteData.index = index;
+    const attrs = await driver.findElements(
+        By.xpath(`//*[@id="${pageId}"]/table/tbody/tr[${index}]/td`)
+    );
+    if (attrs.length < 6) {
+        throw Error(`ページ読み込みエラー <element not found>`);
+    }
+    const typeElement = attrs[1];
+    const contentsElement = attrs[2];
+    const actionElement = attrs[3];
+    const faceElement = attrs[4];
+    const timingElement = attrs[5];
+    emoteData.type = await typeElement.getText();
+    if (emoteData.type === "セリフ") {
+        let contents = await contentsElement
+            .findElement(By.xpath("./a/span"))
+            .getAttribute("innerHTML");
+        // 余計な文字消す
+        contents = contents
+            .split("\r")
+            .join("")
+            .split("\n")
+            .join("")
+            .split("\t")
+            .join("");
+        emoteData.contents = contents;
+    } else if (emoteData.type === "スタンプ") {
+        const contents = await contentsElement
+            .findElement(By.xpath("./a/span/img"))
+            .getAttribute("src");
+        const stampNo = contents.split("/")[6].split("_")[0];
+        const stampName = await contentsElement.getText();
+        emoteData.contents = `${stampNo}_${stampName}`;
+    } else {
+        emoteData.contents = await contentsElement.getText();
+    }
+    emoteData.action = await actionElement.getText();
+    emoteData.face = await faceElement.getText();
+    emoteData.timing = await timingElement.getText();
+    return emoteData;
 };
 
 const getEmotePage = async (
@@ -234,47 +284,7 @@ const getEmotePage = async (
     }
     // 読み込み
     for (let i = 0; i < 10; i++) {
-        const emoteData = new EmoteData();
-        emoteData.pageId = pageId;
-        emoteData.index = i + 1;
-        const attrs = await driver.findElements(
-            By.xpath(`//*[@id="${pageId}"]/table/tbody/tr[${i + 1}]/td`)
-        );
-        if (attrs.length < 6) {
-            throw Error(`ページ読み込みエラー <element not found>`);
-        }
-        const typeElement = attrs[1];
-        const contentsElement = attrs[2];
-        const actionElement = attrs[3];
-        const faceElement = attrs[4];
-        const timingElement = attrs[5];
-        emoteData.type = await typeElement.getText();
-        if (emoteData.type === "セリフ") {
-            let contents = await contentsElement
-                .findElement(By.xpath("./a/span"))
-                .getAttribute("innerHTML");
-            // 余計な文字消す
-            contents = contents
-                .split("\r")
-                .join("")
-                .split("\n")
-                .join("")
-                .split("\t")
-                .join("");
-            emoteData.contents = contents;
-        } else if (emoteData.type === "スタンプ") {
-            const contents = await contentsElement
-                .findElement(By.xpath("./a/span/img"))
-                .getAttribute("src");
-            const stampNo = contents.split("/")[6].split("_")[0];
-            const stampName = await contentsElement.getText();
-            emoteData.contents = `${stampNo}_${stampName}`;
-        } else {
-            emoteData.contents = await contentsElement.getText();
-        }
-        emoteData.action = await actionElement.getText();
-        emoteData.face = await faceElement.getText();
-        emoteData.timing = await timingElement.getText();
+        const emoteData = await getOneEmote(driver, pageId, i + 1);
         addEmote(emoteData.emoteToString());
     }
 };
@@ -285,6 +295,7 @@ const setEmote = async (
 ) => {
     addLog(` ${setting} >処理中<`);
     const emoteData = new EmoteData();
+
     /* parse */
     try {
         emoteData.emoteFromString(setting);
@@ -292,10 +303,16 @@ const setEmote = async (
         addLog("設定を読み込めなかったのでスキップします");
         return;
     }
-    if (emoteData.type != "セリフ" && emoteData.type != "スタンプ") {
+    if (
+        emoteData.type != "セリフ" &&
+        emoteData.type != "スタンプ" &&
+        emoteData.type != "だいじなもの" &&
+        emoteData.type != "その他"
+    ) {
         addLog("セリフ・スタンプ以外のためスキップします");
         return;
     }
+
     /* リストが閉じていたら開く */
     const pageBar = `p1${emoteData.pageId.split("-")[2]}`;
     const listHolder = await driver.wait(
@@ -314,6 +331,18 @@ const setEmote = async (
             `//*[@id="${emoteData.pageId}"]/table/tbody/tr[${emoteData.index}]/td[3]/a`
         );
     }
+
+    /* 変更する必要がなければスキップ */
+    const currentEmote = await getOneEmote(
+        driver,
+        emoteData.pageId,
+        emoteData.index
+    );
+    if (currentEmote.emoteToString() === emoteData.emoteToString()) {
+        addLog("設定済みのためスキップします");
+        return;
+    }
+
     /* 設定ダイアログ開く */
     const openLink = await driver.findElement(
         By.xpath(
@@ -328,8 +357,10 @@ const setEmote = async (
 
     if (emoteData.type === "セリフ") {
         await setDialogue(driver, emoteData);
-    } else {
+    } else if (emoteData.type === "スタンプ") {
         await setStamp(driver, emoteData);
+    } else {
+        await setOthers(driver, emoteData);
     }
 };
 
@@ -388,17 +419,7 @@ const setDialogue = async (
         addLog(`発言タイミング ${emoteData.timing}の設定に失敗しました`);
     }
     /* 登録 */
-    const registerButton = await driver.findElement(
-        By.xpath(
-            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
-        )
-    );
-    if (registerButton != undefined) {
-        await driver.executeScript("arguments[0].click()", registerButton);
-    } else {
-        addLog(`登録に失敗しました`);
-    }
-    await waitUntilDialogClear(driver);
+    await registerOrCancelAndDialogClear(driver, true);
 };
 
 const setStamp = async (
@@ -453,17 +474,35 @@ const setStamp = async (
         addLog(`表情 ${emoteData.face}の設定に失敗しました`);
     }
     /* 登録 */
-    const registerButton = await driver.findElement(
+    await registerOrCancelAndDialogClear(driver, true);
+};
+
+const setOthers = async (
+    driver: webdriver.ThenableWebDriver,
+    emoteData: EmoteData
+) => {
+    /* ラジオボタン　→　だいじなもの or その他 */
+    const radioButtonNum = emoteData.type === "だいじなもの" ? 3 : 4;
+    const rButton = await driver.findElement(
         By.xpath(
-            '//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[3]/p/a'
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[3]/div[${radioButtonNum}]/label/input`
         )
     );
-    if (registerButton != undefined) {
-        await driver.executeScript("arguments[0].click()", registerButton);
+    await driver.executeScript("arguments[0].click()", rButton);
+    /* だいじなもの or その他 */
+    const selectElemNum = emoteData.type === "だいじなもの" ? 1 : 2;
+    const othersElem = await driver.findElement(
+        By.xpath(
+            `//*[@id="emotemsg-edit-modal"]/div/div/form/table[1]/tbody/tr[2]/td[4]/div[${selectElemNum}]/select/option[text()='${emoteData.contents}']`
+        )
+    );
+    if (othersElem != undefined) {
+        await othersElem.click();
     } else {
-        addLog(`登録に失敗しました`);
+        addLog(`${emoteData.type} ${emoteData.contents}の設定に失敗しました`);
     }
-    await waitUntilDialogClear(driver);
+    /* 登録 */
+    await registerOrCancelAndDialogClear(driver, true);
 };
 
 const waitUntilListOpen = async (
@@ -532,30 +571,59 @@ const waitUntilDialog = async (driver: webdriver.ThenableWebDriver) => {
     );
 };
 
-const waitUntilDialogClear = async (driver: webdriver.ThenableWebDriver) => {
-    await driver.wait(
-        async () => {
-            try {
-                const dlg = await driver
-                    .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
-                    .catch((e) => {
-                        return undefined;
-                    });
-                if (dlg === undefined) {
-                    return true;
-                }
-                const visible = await dlg.isDisplayed();
-                if (!visible) {
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                return true;
-            }
-        },
-        6000,
-        "waitUntilDialogClear()"
-    );
+const registerOrCancelAndDialogClear = async (
+    driver: webdriver.ThenableWebDriver,
+    isRegister: boolean
+) => {
+    let max_retry = 5;
+    let last_error: unknown = undefined;
+    while (max_retry > 0) {
+        max_retry -= 1;
+        const buttonNumber = isRegister ? 3 : 1;
+        const registerOrCancelButton = await driver.findElement(
+            By.xpath(
+                `//*[@id="emotemsg-edit-modal"]/div/div/form/table[2]/tbody/tr/td[${buttonNumber}]/p/a`
+            )
+        );
+        if (registerOrCancelButton != undefined) {
+            await driver.executeScript(
+                "arguments[0].click()",
+                registerOrCancelButton
+            );
+        } else {
+            return;
+        }
+
+        try {
+            await driver.wait(
+                async () => {
+                    try {
+                        const dlg = await driver
+                            .findElement(By.xpath('//*[@id="_mdlg_dlg"]'))
+                            .catch((e) => {
+                                return undefined;
+                            });
+                        if (dlg === undefined) {
+                            return true;
+                        }
+                        const visible = await dlg.isDisplayed();
+                        if (!visible) {
+                            return true;
+                        }
+                        return false;
+                    } catch (error) {
+                        return true;
+                    }
+                },
+                6000,
+                "waitUntilDialogClear()"
+            );
+            return;
+        } catch (error) {
+            last_error = error;
+        }
+    }
+    throw last_error;
 };
 
 class EmoteData {
