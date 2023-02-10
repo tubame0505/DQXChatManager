@@ -199,7 +199,7 @@ const importEmote = async (emote: string) => {
                 break;
             } catch (error) {
                 last_error = error;
-                registerOrCancelAndDialogClear(_driver, false);
+                await _driver.get(TargetURL);
             }
         }
         if (max_retry == 0) {
