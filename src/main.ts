@@ -198,8 +198,16 @@ const importEmote = async (emote: string) => {
                 }
                 break;
             } catch (error) {
-                last_error = error;
-                await _driver.get(TargetURL);
+                // 5秒待機する
+                try {
+                    await new Promise((resolve) => setTimeout(resolve, 5000));
+                    last_error = error;
+                    await _driver.get(TargetURL);
+                } catch (error) {
+                    // 対処不能なエラー
+                    last_error = error;
+                    max_retry = 0;
+                }
             }
         }
         if (max_retry == 0) {
