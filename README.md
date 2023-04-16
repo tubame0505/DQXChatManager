@@ -17,7 +17,7 @@
 
 ## ダウンロード
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.11/DQXChatManager-win32-x64.zip)  
+[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.12/DQXChatManager-win32-x64.zip)  
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ![](./media/screen14.png)
@@ -96,3 +96,4 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 -   v0.1.9: ユーザプロファイルを保存する機能を追加
 -   v0.1.10: だいじなもの/その他アイテムに対応　変更が不要な項目はスキップするように動作変更
 -   v0.1.11: リトライ時に広場ページを再読込する動作に変更
+-   v0.1.12: リトライ時のエラーを改善
