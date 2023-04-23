@@ -104,7 +104,7 @@ const login = async (driverPath: string, profile: string) => {
         dispose();
         const service = new edge.ServiceBuilder(driverPath);
         const edgeOptions = new edge.Options();
-        edgeOptions.windowSize({ width: 1000, height: 1200 });
+        edgeOptions.windowSize({ width: 1100, height: 980 });
         if (profilePath.length > 0) {
             edgeOptions.addArguments(`--user-data-dir=${profilePath}`);
         }
