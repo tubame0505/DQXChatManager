@@ -3,8 +3,8 @@
 ## はじめに
 
 -   DQX のよく使うセリフを管理するアプリです
--   現在の設定を PC へ保存したり、保存した状態を復元できます
--   [Edge](https://www.microsoft.com/ja-jp/edge)がインストールされた Windows PC が必要です（普通は入っていると思います）
+-   現在の設定をパソコンで保存したり、保存した状態を復元できます
+-   [Edge](https://www.microsoft.com/ja-jp/edge)がインストールされた **Windows PC** が必要です（普通は入っていると思います）
 -   Mac/スマホなどでは動作しません
 -   このページの内容をよく読み理解できる方のみ使用願います
 
@@ -15,9 +15,10 @@
 -   現在のよく使うセリフの設定をテキストへ出力する
 -   テキストの内容をもとに、アプリがブラウザを操作してよく使うセリフを設定する
 
-## ダウンロード
+## [ダウンロード（ここをクリック）](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.13/DQXChatManager-win32-x64.zip)
 
-[ダウンロード](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.13/DQXChatManager-win32-x64.zip)  
+[（参考リンク）ZIP ファイルの展開方法](https://www.yurikago.net/yurietax/unzip_vista7.html)
+
 ダウンロードした ZIP ファイルを展開して、中の DQXChatManager.exe を実行してください
 
 ![](./media/screen14.png)
@@ -74,8 +75,6 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 -   <span style="color: red; ">[注意]</span> ログイン状態はファイルに保存されているので、複数人が使用するパソコンでの利用はお控えください。
 -   万が一保存してしまった場合は削除してください。保存ファイルの場所は"resources\app\dist\profiles"になります。
 -   よくわからない場合は DQXChatManager があるフォルダごと削除してください。
-
-## 使い方　[(スプレッドシートを使った編集)](./spread-sheets.md)
 
 ## 注意事項
 
