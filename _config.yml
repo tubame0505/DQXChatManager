@@ -1,3 +1,6 @@
-remote_theme: pages-themes/tactile@v0.2.0
+remote_theme: chrisrhymes/bulma-clean-theme
+lang: ja
+timezone: Asia/Tokyo
 plugins:
-- jekyll-remote-theme
+    - jekyll-sitemap
+    - jekyll-remote-theme
