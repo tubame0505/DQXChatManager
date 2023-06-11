@@ -301,6 +301,10 @@ const getEmotePage = async (
     const listHolderStyle = await listHolder.getAttribute("class");
     if (listHolderStyle.indexOf("hide") > 0) {
         await driver.executeScript("arguments[0].click()", listHolder);
+        await waitUntilListOpen(
+            driver,
+            `//*[@id="${pageId}"]/table/tbody/tr[1]/td[3]/a`
+        );
     }
     // 読み込み
     for (let i = 0; i < 10; i++) {
