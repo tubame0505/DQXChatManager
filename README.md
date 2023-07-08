@@ -15,7 +15,7 @@
 -   現在のよく使うセリフの設定をテキストへ出力する
 -   テキストの内容をもとに、アプリがブラウザを操作してよく使うセリフを設定する
 
-## [ダウンロード（ここをクリック）](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.14/DQXChatManager-win32-x64.zip)
+## [ダウンロード（ここをクリック）](https://github.com/tubame0505/DQXChatManager/releases/download/v0.1.15/DQXChatManager-win32-x64.zip)
 
 [（参考リンク）ZIP ファイルの展開方法](https://www.yurikago.net/yurietax/unzip_vista7.html)
 
@@ -100,3 +100,4 @@ emote-list-0	1	セリフ	ありがとう！	はくしゅ	えがお	はじめ
 -   v0.1.12 　(2023.04.16): リトライ時のエラーを改善
 -   v0.1.13 　(2023.04.23): Edge ブラウザの起動サイズ変更
 -   v0.1.14 　(2023.06.11): 出力したテキストデータが一部空白になる不具合を修正
+-   v0.1.15 　(2023.07.01): セリフ設定後に、正しく設定できたか確認するように動作変更

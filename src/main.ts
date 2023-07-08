@@ -386,6 +386,16 @@ const setEmote = async (
     } else {
         await setOthers(driver, emoteData);
     }
+
+    /* 変更できたかを確認 */
+    const currentEmote2 = await getOneEmote(
+        driver,
+        emoteData.pageId,
+        emoteData.index
+    );
+    if (currentEmote2.emoteToString() != emoteData.emoteToString()) {
+        throw Error("設定後確認時エラー");
+    }
 };
 
 const setDialogue = async (
