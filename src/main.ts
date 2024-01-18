@@ -22,6 +22,10 @@ const createWindow = () => {
     });
     _mainWindow = mainWindow;
     _mainWindow.setMenu(null);
+    _mainWindow.on("close", (event) => {
+        // アプリを閉じたときにブラウザを終了する
+        dispose();
+    });
 
     ipcMain.on("login", async (_e, profile: string) => {
         addLog("check driver.");
@@ -66,12 +70,6 @@ const createWindow = () => {
 };
 
 app.whenReady().then(createWindow);
-app.once("window-all-closed", () => {
-    dispose();
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-});
 
 const addLog = (message: string) => {
     if (_mainWindow != undefined) {
