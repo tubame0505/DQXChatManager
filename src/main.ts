@@ -1,7 +1,6 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
 import path from "path";
 import * as fs from "fs";
-import { searchDevtools } from "electron-search-devtools";
 import { BrowserWindow, app, ipcMain, session, dialog } from "electron";
 import { DriverDownloader } from "./driver_downloader";
 import * as webdriver from "selenium-webdriver";
@@ -55,14 +54,6 @@ const createWindow = () => {
     });
 
     if (isDev) {
-        searchDevtools("REACT")
-            .then((devtools) => {
-                session.defaultSession.loadExtension(devtools, {
-                    allowFileAccess: true,
-                });
-            })
-            .catch((err) => console.log(err));
-
         mainWindow.webContents.openDevTools({ mode: "detach" });
     }
 
