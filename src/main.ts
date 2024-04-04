@@ -1,7 +1,6 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
 import path from "path";
 import * as fs from "fs";
-import { searchDevtools } from "electron-search-devtools";
 import { BrowserWindow, app, ipcMain, session, dialog } from "electron";
 import { DriverDownloader } from "./driver_downloader";
 import * as webdriver from "selenium-webdriver";
@@ -22,6 +21,10 @@ const createWindow = () => {
     });
     _mainWindow = mainWindow;
     _mainWindow.setMenu(null);
+    _mainWindow.on("close", (event) => {
+        // アプリを閉じたときにブラウザを終了する
+        dispose();
+    });
 
     ipcMain.on("login", async (_e, profile: string) => {
         addLog("check driver.");
@@ -51,14 +54,6 @@ const createWindow = () => {
     });
 
     if (isDev) {
-        searchDevtools("REACT")
-            .then((devtools) => {
-                session.defaultSession.loadExtension(devtools, {
-                    allowFileAccess: true,
-                });
-            })
-            .catch((err) => console.log(err));
-
         mainWindow.webContents.openDevTools({ mode: "detach" });
     }
 
@@ -66,12 +61,6 @@ const createWindow = () => {
 };
 
 app.whenReady().then(createWindow);
-app.once("window-all-closed", () => {
-    dispose();
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-});
 
 const addLog = (message: string) => {
     if (_mainWindow != undefined) {
