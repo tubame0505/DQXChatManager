@@ -27,7 +27,7 @@ const createWindow = () => {
     });
 
     ipcMain.on("login", async (_e, profile: string) => {
-        addLog("check driver.");
+                addLog("check driver.");
         const downloader = new DriverDownloader();
         await downloader.getBrowserVersion();
         const edgeVersion = await downloader.getBrowserVersion();
@@ -50,7 +50,7 @@ const createWindow = () => {
         exportEmote();
     });
     ipcMain.on("import", (_e, emote: string) => {
-        importEmote(emote);
+                importEmote(emote);
     });
 
     if (isDev) {

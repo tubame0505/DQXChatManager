@@ -15,43 +15,38 @@ export const App = () => {
     const onTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setEmoteData(event.currentTarget.value);
     };
+
     const onStateMessage = (message: string) => {
-        setStateData((stateData) => stateData + message);
-        stateareaRef.current?.focus();
-        stateareaRef.current?.setSelectionRange(
-            stateData.length,
-            stateData.length
-        );
-        // Memo: こうしないとキレイにスクロールされない
-        textareaRef.current?.focus();
-        textareaRef.current?.blur();
-        stateareaRef.current?.blur();
+        setStateData((prev) => {
+            const updatedStateData = prev + message;
+            stateareaRef.current?.focus();
+            stateareaRef.current?.setSelectionRange(updatedStateData.length, updatedStateData.length);
+            return updatedStateData;
+        });
     };
+
     const onEmoteMessage = (message: string) => {
-        setEmoteData((emoteData) => emoteData + message);
-        textareaRef.current?.focus();
-        textareaRef.current?.setSelectionRange(
-            emoteData.length,
-            emoteData.length
-        );
-        // Memo: こうしないとキレイにスクロールされない
-        stateareaRef.current?.focus();
-        textareaRef.current?.blur();
-        stateareaRef.current?.blur();
+        setEmoteData((prev) => {
+            const updatedEmoteData = prev + message;
+            textareaRef.current?.focus();
+            textareaRef.current?.setSelectionRange(updatedEmoteData.length, updatedEmoteData.length);
+            return updatedEmoteData;
+        });
     };
-    const onLogin = () => {
-        myAPI.login(profile);
-    };
+
+    const onLogin = () => myAPI.login(profile);
+
     const onExport = () => {
-        setEmoteData((emoteData) => ""); // Clear
+        setEmoteData(""); // Clear
         myAPI.export();
     };
-    const onImport = () => {
-        myAPI.import(emoteData);
-    };
+
+    const onImport = () => myAPI.import(emoteData);
+
     const onSelectProfile = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setProfile(event.target.value);
     };
+
     const messageListener = (target: string, message: string): void => {
         if (target === "log") {
             onStateMessage(message);
@@ -59,7 +54,8 @@ export const App = () => {
             onEmoteMessage(message);
         }
     };
-    if (messageHandler != undefined) {
+
+    if (messageHandler) {
         messageHandler();
     }
     messageHandler = myAPI.onReceiveMessage(messageListener);
@@ -85,7 +81,7 @@ export const App = () => {
                     cols={120}
                     rows={27}
                     spellCheck={false}
-                    onChange={(e) => onTextChange(e)}
+                    onChange={onTextChange}
                 />
             </div>
             <div id="statedata">
@@ -95,7 +91,7 @@ export const App = () => {
                     cols={100}
                     rows={12}
                     spellCheck={false}
-                    readOnly={true}
+                    readOnly
                 />
             </div>
         </div>

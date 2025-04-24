@@ -8,21 +8,13 @@ import * as regedit from "regedit";
 import * as child_process from "child_process";
 
 const WINDOWS_REGISTRY_APP_PATHS =
-    "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" +
-    "msedge.exe";
+    "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe";
 const CDN_URL = "https://msedgedriver.azureedge.net/";
 
 /* for Windows only */
 export class DriverDownloader {
     getArchitecture() {
         const platform = process.platform;
-        if (
-            platform !== "linux" &&
-            platform !== "darwin" &&
-            platform !== "win32"
-        ) {
-            return undefined;
-        }
         if (platform === "darwin") {
             return { platform: "mac", bitness: "64" };
         }
@@ -33,60 +25,50 @@ export class DriverDownloader {
     }
 
     async getDriver(basePath: string, version: string | undefined = undefined) {
-        if (version === undefined) {
+        if (!version) {
             version = await this.getBrowserVersion();
         }
-        if (version === undefined) {
-            return {
-                path: undefined,
-                error: "getBroserversion error.",
-            };
+        if (!version) {
+            return { path: undefined, error: "getBrowserVersion error." };
         }
-        // Check downloadad?
+
         const driverBasePath = path.join(basePath, "win64");
         const driverPath = this.getDriverPath(basePath, version);
         const driverDir = path.dirname(driverPath);
         const url = `${CDN_URL}/${version}/edgedriver_win64.zip`;
+
         try {
             fs.mkdirSync(driverBasePath, { recursive: true });
             if (this.isDriverInstalled(basePath, version)) {
                 return { path: driverPath, error: undefined };
             }
-            // remove old driver
-            const dirs = fs.readdirSync(driverBasePath).filter((file) => {
-                return fs
-                    .statSync(path.join(driverBasePath, file))
-                    .isDirectory();
-            });
+
+            const dirs = fs.readdirSync(driverBasePath).filter((file) =>
+                fs.statSync(path.join(driverBasePath, file)).isDirectory()
+            );
             dirs.forEach((dir) => {
                 try {
-                    fs.rmSync(path.join(driverBasePath, dir), {
-                        recursive: true,
-                        force: true,
-                    });
+                    fs.rmSync(path.join(driverBasePath, dir), { recursive: true, force: true });
                 } catch {
-                    // nop
+                    // Ignore errors
                 }
             });
-            // download
+
             fs.mkdirSync(driverDir, { recursive: true });
-            const response = await axios.default.get(url, {
-                responseType: "arraybuffer",
-            });
+            const response = await axios.default.get(url, { responseType: "arraybuffer" });
+            if (response.status !== 200) {
+                throw new Error(`Failed to download driver: HTTP ${response.status}`);
+            }
             const data = Buffer.from(response.data);
-            fs.writeFileSync(driverDir + "/temp.zip", data);
-            await compressing.zip.uncompress(
-                driverDir + "/temp.zip",
-                driverDir
-            );
-            fs.unlinkSync(driverDir + "/temp.zip");
+            const tempZipPath = path.join(driverDir, "temp.zip");
+            fs.writeFileSync(tempZipPath, data);
+            await compressing.zip.uncompress(tempZipPath, driverDir);
+            fs.unlinkSync(tempZipPath);
+
             return { path: driverPath, error: undefined };
         } catch (error) {
-            //console.error(`getLatestDriver error ${error}`);
-            return {
-                path: undefined,
-                error: `getLatestDriver error ${error}`,
-            };
+            console.error("Error during driver download or extraction:", error);
+            return { path: undefined, error: `getLatestDriver error ${error}` };
         }
     }
 
@@ -100,43 +82,38 @@ export class DriverDownloader {
     }
 
     async getBrowserVersion() {
-        const platform = process.platform;
-        if (platform != "win32") {
+        if (process.platform !== "win32") {
             return undefined;
         }
-        const exePath = await this.getWindowsExePath(
-            WINDOWS_REGISTRY_APP_PATHS
-        );
-        if (exePath === undefined) {
+
+        const exePath = await this.getWindowsExePath(WINDOWS_REGISTRY_APP_PATHS);
+        if (!exePath) {
             return undefined;
         }
+
         try {
             const runCommand = util.promisify(child_process.execFile);
             const exeVersion = await runCommand("powershell", [
                 `(Get-Item "${exePath}").VersionInfo.ProductVersion`,
             ]);
             return exeVersion.stdout.split("\r")[0];
-        } catch (error) {
+        } catch {
             return undefined;
         }
     }
 
     async getWindowsExePath(regPath: string) {
-        const regQuery: (
-            arg1: readonly string[],
-            arg2: string
-        ) => Promise<unknown> = util.promisify(regedit.list);
+        const regQuery = util.promisify(regedit.list);
         try {
-            let result: any = await regQuery([regPath], "64");
+            let result: any = await regQuery([regPath]);
             if (!result[regPath].exists || !result[regPath].values[""]) {
-                result = await regQuery([regPath], "32");
+                result = await regQuery([regPath]);
             }
             if (!result[regPath].exists || !result[regPath].values[""]) {
                 return undefined;
             }
-            const exePath: string = result[regPath].values[""].value;
-            return exePath;
-        } catch (error) {
+            return result[regPath].values[""].value;
+        } catch {
             return undefined;
         }
     }
