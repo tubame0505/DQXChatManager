@@ -9,7 +9,7 @@ import * as child_process from "child_process";
 
 const WINDOWS_REGISTRY_APP_PATHS =
     "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe";
-const CDN_URL = "https://msedgedriver.azureedge.net/";
+const CDN_URL = "https://msedgedriver.microsoft.com/";
 
 /* for Windows only */
 export class DriverDownloader {
@@ -43,21 +43,30 @@ export class DriverDownloader {
                 return { path: driverPath, error: undefined };
             }
 
-            const dirs = fs.readdirSync(driverBasePath).filter((file) =>
-                fs.statSync(path.join(driverBasePath, file)).isDirectory()
-            );
+            const dirs = fs
+                .readdirSync(driverBasePath)
+                .filter((file) =>
+                    fs.statSync(path.join(driverBasePath, file)).isDirectory()
+                );
             dirs.forEach((dir) => {
                 try {
-                    fs.rmSync(path.join(driverBasePath, dir), { recursive: true, force: true });
+                    fs.rmSync(path.join(driverBasePath, dir), {
+                        recursive: true,
+                        force: true,
+                    });
                 } catch {
                     // Ignore errors
                 }
             });
 
             fs.mkdirSync(driverDir, { recursive: true });
-            const response = await axios.default.get(url, { responseType: "arraybuffer" });
+            const response = await axios.default.get(url, {
+                responseType: "arraybuffer",
+            });
             if (response.status !== 200) {
-                throw new Error(`Failed to download driver: HTTP ${response.status}`);
+                throw new Error(
+                    `Failed to download driver: HTTP ${response.status}`
+                );
             }
             const data = Buffer.from(response.data);
             const tempZipPath = path.join(driverDir, "temp.zip");
@@ -86,7 +95,9 @@ export class DriverDownloader {
             return undefined;
         }
 
-        const exePath = await this.getWindowsExePath(WINDOWS_REGISTRY_APP_PATHS);
+        const exePath = await this.getWindowsExePath(
+            WINDOWS_REGISTRY_APP_PATHS
+        );
         if (!exePath) {
             return undefined;
         }

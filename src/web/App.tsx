@@ -17,19 +17,26 @@ export const App = () => {
     };
 
     const onStateMessage = (message: string) => {
-        setStateData((prev) => {
-            const updatedStateData = prev + message;
-            stateareaRef.current?.focus();
-            stateareaRef.current?.setSelectionRange(updatedStateData.length, updatedStateData.length);
-            return updatedStateData;
-        });
+        setStateData((stateData) => stateData + message);
+        stateareaRef.current?.focus();
+        stateareaRef.current?.setSelectionRange(
+            stateData.length,
+            stateData.length
+        );
+        // Memo: こうしないとキレイにスクロールされない
+        textareaRef.current?.focus();
+        textareaRef.current?.blur();
+        stateareaRef.current?.blur();
     };
 
     const onEmoteMessage = (message: string) => {
         setEmoteData((prev) => {
             const updatedEmoteData = prev + message;
             textareaRef.current?.focus();
-            textareaRef.current?.setSelectionRange(updatedEmoteData.length, updatedEmoteData.length);
+            textareaRef.current?.setSelectionRange(
+                updatedEmoteData.length,
+                updatedEmoteData.length
+            );
             return updatedEmoteData;
         });
     };
