@@ -6,6 +6,22 @@ export interface IElectronAPI {
     onReceiveMessage: (
         listener: (target: string, message: string) => void
     ) => () => void;
+    // コンテキストメニュー関連のAPI
+    showContextMenu: (data: {
+        targetId: string;
+        selectedText: string;
+        hasSelection: boolean;
+        isReadOnly: boolean;
+        hasClipboardText: boolean;
+    }) => void;
+    // クリップボード操作API
+    clipboardCut: (targetId: string, selectedText: string) => void;
+    clipboardCopy: (selectedText: string) => void;
+    clipboardPaste: (
+        targetId: string
+    ) => Promise<{ targetId: string; text: string }>;
+    textDelete: (targetId: string) => void;
+    textSelectAll: (targetId: string) => void;
 }
 
 declare global {
