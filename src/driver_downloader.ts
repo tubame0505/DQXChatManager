@@ -1,5 +1,4 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
-import * as axios from "axios";
 import path from "path";
 import * as compressing from "compressing";
 import * as util from "util";
@@ -75,18 +74,27 @@ export class DriverDownloader {
 
             await SecureFileManager.safeCreateDirectory(driverDir, basePath);
 
-            const response = await axios.default.get(url, {
-                responseType: "arraybuffer",
-                timeout: 30000, // タイムアウト設定
-            });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-            if (response.status !== 200) {
-                throw new Error(
-                    `Failed to download driver: HTTP ${response.status}`
-                );
+            let data: Buffer;
+            try {
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Failed to download driver: HTTP ${response.status}`
+                    );
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                data = Buffer.from(arrayBuffer);
+            } finally {
+                clearTimeout(timeoutId);
             }
 
-            const data = Buffer.from(response.data);
             const tempZipPath = path.join(driverDir, "temp.zip");
 
             await SecureFileManager.safeWriteFile(tempZipPath, data, basePath);
