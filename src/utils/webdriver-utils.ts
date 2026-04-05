@@ -122,8 +122,7 @@ export class WebDriverUtils {
                 `${selectXPath}/option[text()='${optionText}']`
             );
             if (optionElement) {
-                //await this.clickElementSafely(driver, optionElement);
-                await optionElement.click();
+                await driver.executeScript("arguments[0].selected = true;", optionElement);
                 return true;
             }
             return false;
