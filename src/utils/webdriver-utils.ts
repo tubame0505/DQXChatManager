@@ -24,7 +24,28 @@ export class WebDriverUtils {
         driver: webdriver.ThenableWebDriver,
         element: WebElement
     ): Promise<void> {
-        await driver.executeScript("arguments[0].click()", element);
+        await driver.wait(async () => {
+            try {
+                return (
+                    (await element.isDisplayed()) && (await element.isEnabled())
+                );
+            } catch (error) {
+                return false;
+            }
+        }, 6000);
+
+        await driver.executeScript(
+            `arguments[0].scrollIntoView({ block: "center", inline: "center" });`,
+            element
+        );
+
+        await driver.sleep(150);
+
+        try {
+            await element.click();
+        } catch (error) {
+            await driver.executeScript("arguments[0].click()", element);
+        }
     }
 
     /**
@@ -122,7 +143,20 @@ export class WebDriverUtils {
                 `${selectXPath}/option[text()='${optionText}']`
             );
             if (optionElement) {
-                await driver.executeScript("arguments[0].selected = true;", optionElement);
+                await driver.executeScript(
+                    `
+                        const option = arguments[0];
+                        const select = option.parentElement;
+
+                        option.selected = true;
+
+                        if (select) {
+                            select.dispatchEvent(new Event("input", { bubbles: true }));
+                            select.dispatchEvent(new Event("change", { bubbles: true }));
+                        }
+                    `,
+                    optionElement
+                );
                 return true;
             }
             return false;
