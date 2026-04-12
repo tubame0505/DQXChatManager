@@ -2,7 +2,11 @@
   "extends": ".",
   "compilerOptions": {
     "module": "CommonJS",
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "src",
   },
-  "include": ["src/*.ts", "src/@types/*.d.ts"]
+  "include": [
+    "src/*.ts",
+    "src/@types/*.d.ts"
+  ]
 }

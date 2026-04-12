@@ -1,10 +1,11 @@
-import { Configuration } from "webpack";
+import webpack from 'webpack';
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 const isDev = process.env.NODE_ENV === "development";
 const noWatch = process.env.NO_WATCH === "true";
 const watchFlag = !noWatch && isDev;
+type Configuration = webpack.Configuration;
 
 const common: Configuration = {
     mode: isDev ? "development" : "production",

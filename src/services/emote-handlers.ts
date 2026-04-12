@@ -75,21 +75,25 @@ abstract class BaseEmoteHandler implements IEmoteHandler {
         driver: webdriver.ThenableWebDriver,
         emoteData: EmoteData
     ): Promise<void> {
-        // しぐさ設定
-        await this.selectOption(
-            driver,
-            XPathSelectors.ACTION_SELECT,
-            emoteData.action,
-            "しぐさ"
-        );
+        // しぐさ設定（セリフ、スタンプ）
+        if (emoteData.type === "セリフ" || emoteData.type === "スタンプ") {
+            await this.selectOption(
+                driver,
+                XPathSelectors.ACTION_SELECT,
+                emoteData.action,
+                "しぐさ"
+            );
+        }
 
-        // 表情設定
-        await this.selectOption(
-            driver,
-            XPathSelectors.FACE_SELECT,
-            emoteData.face,
-            "表情"
-        );
+        // 表情設定（セリフ、スタンプ）
+        if (emoteData.type === "セリフ" || emoteData.type === "スタンプ") {
+            await this.selectOption(
+                driver,
+                XPathSelectors.FACE_SELECT,
+                emoteData.face,
+                "表情"
+            );
+        }
 
         // タイミング設定（セリフの場合のみ）
         if (emoteData.type === "セリフ") {
