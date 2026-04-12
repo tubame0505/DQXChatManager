@@ -37,7 +37,8 @@ abstract class BaseEmoteHandler implements IEmoteHandler {
         webDriverSession: IWebDriverSession,
         emoteData: EmoteData
     ): Promise<void> {
-        if (!this.canHandle(emoteData.type as EmoteType)) {
+        const emoteType = EmoteData.parseEmoteType(emoteData.type);
+        if (!emoteType || !this.canHandle(emoteType)) {
             throw new EmoteProcessingError(
                 `このハンドラーでは ${emoteData.type} を処理できません`,
                 "INVALID_EMOTE_TYPE"
@@ -274,7 +275,13 @@ export class OthersHandler extends BaseEmoteHandler {
         driver: webdriver.ThenableWebDriver,
         emoteData: EmoteData
     ): Promise<void> {
-        const emoteType = emoteData.type as EmoteType;
+        const emoteType = EmoteData.parseEmoteType(emoteData.type);
+        if (!emoteType) {
+            throw new EmoteProcessingError(
+                `サポートされていないエモートタイプ: ${emoteData.type}`,
+                "UNSUPPORTED_EMOTE_TYPE"
+            );
+        }
 
         // まず適切なラジオボタンを選択
         await this.selectRadioButtonByType(driver, emoteType);

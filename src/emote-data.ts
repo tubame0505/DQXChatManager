@@ -2,10 +2,17 @@ import { ContentSanitizer } from "./security/content-sanitizer";
 import { EmoteType, PageId } from "./config/app-config";
 import { EmoteValidationError } from "./exceptions/emote-processing-exceptions";
 
+const VALID_EMOTE_TYPES: ReadonlyArray<EmoteType> = [
+    "セリフ",
+    "スタンプ",
+    "だいじなもの",
+    "その他",
+];
+
 export interface IEmoteData {
     pageId: PageId;
     index: number;
-    type: EmoteType;
+    type: string;
     contents: string;
     action: string;
     face: string;
@@ -15,7 +22,7 @@ export interface IEmoteData {
 export class EmoteData implements IEmoteData {
     pageId: PageId = "" as PageId;
     index: number = -1;
-    type: EmoteType = "セリフ";
+    type: string = "セリフ";
     contents: string = "";
     action: string = "";
     face: string = "";
@@ -61,12 +68,7 @@ export class EmoteData implements IEmoteData {
     }
 
     contentsToKey(): string {
-        return this.contents
-            .replace(/&nbsp;/g, " ")
-            .replace(/&amp;/g, "&")
-            .replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">")
-            .replace(/<br>/g, "\r\n");
+        return ContentSanitizer.prepareForSendKeys(this.contents);
     }
 
     /**
@@ -122,37 +124,28 @@ export class EmoteData implements IEmoteData {
     }
 
     private validateEmoteType(type: string): EmoteType {
-        const validTypes: EmoteType[] = [
-            "セリフ",
-            "スタンプ",
-            "だいじなもの",
-            "その他",
-        ];
-        if (!validTypes.includes(type as EmoteType)) {
+        if (!EmoteData.isEmoteType(type)) {
             throw new EmoteValidationError(
                 `Invalid emote type: ${type}`,
                 { type },
                 "type"
             );
         }
-        return type as EmoteType;
+        return type;
     }
 
     /**
-     * 文字列を安全にEmoteTypeに変換
+     * 文字列がEmoteTypeかどうかを判定
      */
-    static toEmoteType(type: string): EmoteType {
-        const validTypes: EmoteType[] = [
-            "セリフ",
-            "スタンプ",
-            "だいじなもの",
-            "その他",
-        ];
-        if (validTypes.includes(type as EmoteType)) {
-            return type as EmoteType;
-        }
-        // デフォルトはセリフ
-        return "セリフ";
+    static isEmoteType(type: string): type is EmoteType {
+        return VALID_EMOTE_TYPES.includes(type as EmoteType);
+    }
+
+    /**
+     * 文字列をEmoteTypeに変換し、未知の値はnullで返す
+     */
+    static parseEmoteType(type: string): EmoteType | null {
+        return EmoteData.isEmoteType(type) ? type : null;
     }
 
     /**

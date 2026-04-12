@@ -3,6 +3,35 @@ import * as webdriver from "selenium-webdriver";
 import { By, WebElement } from "selenium-webdriver";
 
 export class WebDriverUtils {
+    static escapeXPathStringLiteral(value: string): string {
+        if (!value) {
+            return "''";
+        }
+
+        if (!value.includes("'")) {
+            return `'${value}'`;
+        }
+
+        if (!value.includes('"')) {
+            return `"${value}"`;
+        }
+
+        const parts = value.split("'");
+        const escapedParts: string[] = [];
+
+        for (let i = 0; i < parts.length; i++) {
+            if (parts[i].length > 0) {
+                escapedParts.push(`'${parts[i]}'`);
+            }
+
+            if (i < parts.length - 1) {
+                escapedParts.push(`"'"`);
+            }
+        }
+
+        return `concat(${escapedParts.join(", ")})`;
+    }
+
     /**
      * 要素を安全に取得する（見つからない場合はnullを返す）
      */
@@ -138,9 +167,10 @@ export class WebDriverUtils {
         optionText: string
     ): Promise<boolean> {
         try {
+            const optionTextLiteral = this.escapeXPathStringLiteral(optionText);
             const optionElement = await this.findElementSafely(
                 driver,
-                `${selectXPath}/option[text()='${optionText}']`
+                `${selectXPath}/option[text()=${optionTextLiteral}]`
             );
             if (optionElement) {
                 await driver.executeScript(
