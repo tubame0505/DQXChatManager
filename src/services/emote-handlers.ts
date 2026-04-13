@@ -191,11 +191,11 @@ export class DialogueHandler extends BaseEmoteHandler {
         const contentsArea = await driver.findElement(
             By.xpath(XPathSelectors.CONTENTS_TEXTAREA)
         );
-        await contentsArea.clear();
-
-        if (emoteData.contents !== "（なし）") {
-            await contentsArea.sendKeys(emoteData.contentsToKey());
-        }
+        await WebDriverUtils.sendKeysSafely(
+            driver,
+            contentsArea,
+            emoteData.contentsToKey()
+        );
     }
 
     protected getRequiredFields(): string[] {

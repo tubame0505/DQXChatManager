@@ -33,6 +33,30 @@ export class WebDriverUtils {
     }
 
     /**
+     * 要素が操作可能になるまで待機する
+     */
+    static async waitForElementToBeInteractable(
+        driver: webdriver.ThenableWebDriver,
+        element: WebElement,
+        timeout: number = 6000
+    ): Promise<void> {
+        await driver.wait(
+            async () => {
+                try {
+                    return (
+                        (await element.isDisplayed()) &&
+                        (await element.isEnabled())
+                    );
+                } catch (error) {
+                    return false;
+                }
+            },
+            timeout,
+            "Timeout waiting for element to become interactable"
+        );
+    }
+
+    /**
      * 要素を安全に取得する（見つからない場合はnullを返す）
      */
     static async findElementSafely(
@@ -53,15 +77,7 @@ export class WebDriverUtils {
         driver: webdriver.ThenableWebDriver,
         element: WebElement
     ): Promise<void> {
-        await driver.wait(async () => {
-            try {
-                return (
-                    (await element.isDisplayed()) && (await element.isEnabled())
-                );
-            } catch (error) {
-                return false;
-            }
-        }, 6000);
+        await this.waitForElementToBeInteractable(driver, element);
 
         await driver.executeScript(
             `arguments[0].scrollIntoView({ block: "center", inline: "center" });`,
@@ -167,16 +183,54 @@ export class WebDriverUtils {
         optionText: string
     ): Promise<boolean> {
         try {
+            const selectElement = await this.findElementSafely(
+                driver,
+                selectXPath
+            );
+            if (!selectElement) {
+                return false;
+            }
+
+            await this.waitForElementToBeInteractable(driver, selectElement);
+
             const optionTextLiteral = this.escapeXPathStringLiteral(optionText);
+            const optionXPath = `${selectXPath}/option[text()=${optionTextLiteral}]`;
+
+            await driver.wait(
+                async () => {
+                    try {
+                        const optionElement = await this.findElementSafely(
+                            driver,
+                            optionXPath
+                        );
+                        return !!optionElement;
+                    } catch (error) {
+                        return false;
+                    }
+                },
+                6000,
+                `Timeout waiting for option: ${optionText}`
+            );
+
+            const readySelectElement = await this.findElementSafely(
+                driver,
+                selectXPath
+            );
+            if (readySelectElement) {
+                await this.waitForElementToBeInteractable(
+                    driver,
+                    readySelectElement
+                );
+            }
             const optionElement = await this.findElementSafely(
                 driver,
-                `${selectXPath}/option[text()=${optionTextLiteral}]`
+                optionXPath
             );
-            if (optionElement) {
+            if (readySelectElement && optionElement) {
                 await driver.executeScript(
                     `
-                        const option = arguments[0];
-                        const select = option.parentElement;
+                        const select = arguments[0];
+                        const option = arguments[1];
 
                         option.selected = true;
 
@@ -185,6 +239,7 @@ export class WebDriverUtils {
                             select.dispatchEvent(new Event("change", { bubbles: true }));
                         }
                     `,
+                    readySelectElement,
                     optionElement
                 );
                 return true;
@@ -199,12 +254,15 @@ export class WebDriverUtils {
      * テキストエリアに安全にテキストを入力する
      */
     static async sendKeysSafely(
+        driver: webdriver.ThenableWebDriver,
         element: WebElement,
         text: string
     ): Promise<void> {
         try {
+            await this.waitForElementToBeInteractable(driver, element);
             await element.clear();
             if (text && text !== "（なし）") {
+                await this.waitForElementToBeInteractable(driver, element);
                 await element.sendKeys(text);
             }
         } catch (error) {
