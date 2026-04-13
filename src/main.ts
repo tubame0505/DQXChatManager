@@ -42,6 +42,18 @@ const createWindow = () => {
     mainWindow.loadFile("dist/index.html");
 };
 
+const logAsyncIpcError = (action: string, error: unknown) => {
+    if (!logger) {
+        return;
+    }
+
+    const errorMessage =
+        error instanceof Error
+            ? error.message
+            : String(error ?? "unknown error");
+    logger.error(`IPC ${action}処理でエラーが発生しました: ${errorMessage}`);
+};
+
 const setupIpcHandlers = () => {
     ipcMain.on("login", async (_e, profile: string) => {
         if (!dqxHiroba || !logger) return;
@@ -85,7 +97,9 @@ const setupIpcHandlers = () => {
 
     ipcMain.on("export", (_e) => {
         if (dqxHiroba) {
-            dqxHiroba.exportEmote();
+            void dqxHiroba.exportEmote().catch((error) => {
+                logAsyncIpcError("export", error);
+            });
         }
     });
 
@@ -95,7 +109,9 @@ const setupIpcHandlers = () => {
                 logger.warn("空のエモートデータが指定されました");
                 return;
             }
-            dqxHiroba.importEmote(emote);
+            void dqxHiroba.importEmote(emote).catch((error) => {
+                logAsyncIpcError("import", error);
+            });
         }
     });
 

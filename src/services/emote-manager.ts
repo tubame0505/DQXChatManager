@@ -175,14 +175,7 @@ export class EmoteManager implements IEmoteManager {
     }
 
     validateEmoteData(emoteData: EmoteData): boolean {
-        const supportedTypes: EmoteType[] = [
-            "セリフ",
-            "スタンプ",
-            "だいじなもの",
-            "その他",
-        ];
-
-        if (!supportedTypes.includes(emoteData.type as EmoteType)) {
+        if (!EmoteData.isEmoteType(emoteData.type)) {
             this.logger.warn(
                 `サポートされていないエモートタイプ: ${emoteData.type}`
             );
@@ -319,11 +312,10 @@ export class EmoteManager implements IEmoteManager {
             emoteData.pageId as PageId,
             emoteData.index
         );
+        const expectedNormalizedEmote = emoteData.emoteToNormalizedString();
+        const currentNormalizedEmote = currentEmote.emoteToNormalizedString();
 
-        if (
-            currentEmote.emoteToNormalizedString() ===
-            emoteData.emoteToNormalizedString()
-        ) {
+        if (currentNormalizedEmote === expectedNormalizedEmote) {
             this.addLog("設定済みのためスキップします");
             return false; // 操作未実行（スキップされた）
         }
@@ -332,9 +324,15 @@ export class EmoteManager implements IEmoteManager {
         await this.openEditDialog(emoteData);
 
         // エモートタイプに応じた処理
-        const handler = this.emoteHandlerFactory.getHandler(
-            emoteData.type as EmoteType
-        );
+        const emoteType = EmoteData.parseEmoteType(emoteData.type);
+        if (!emoteType) {
+            this.addLog(
+                "サポートされていないエモートタイプのためスキップします"
+            );
+            return false;
+        }
+
+        const handler = this.emoteHandlerFactory.getHandler(emoteType);
         await handler.setEmote(this.webDriverSession, emoteData);
 
         // 設定後の確認
@@ -342,12 +340,10 @@ export class EmoteManager implements IEmoteManager {
             emoteData.pageId as PageId,
             emoteData.index
         );
-        if (
-            updatedEmote.emoteToNormalizedString() !==
-            emoteData.emoteToNormalizedString()
-        ) {
+        const updatedNormalizedEmote = updatedEmote.emoteToNormalizedString();
+        if (updatedNormalizedEmote !== expectedNormalizedEmote) {
             this.logger.warn(
-                `設定後の確認で不一致: 期待値="${emoteData.emoteToNormalizedString()}", 実際値="${updatedEmote.emoteToNormalizedString()}"`
+                `設定後の確認で不一致: 期待値="${expectedNormalizedEmote}", 実際値="${updatedNormalizedEmote}"`
             );
             throw new EmoteProcessingError(
                 "設定後確認時エラー",
@@ -445,14 +441,13 @@ export class EmoteManager implements IEmoteManager {
             timingElement,
         ] = attrs;
 
-        emoteData.type = EmoteData.toEmoteType(
-            await WebDriverUtils.getTextSafely(typeElement)
-        );
+        emoteData.type = await WebDriverUtils.getTextSafely(typeElement);
+        const emoteType = EmoteData.parseEmoteType(emoteData.type);
 
-        if (emoteData.type === "セリフ") {
+        if (emoteType === "セリフ") {
             emoteData.contents =
                 await this.extractDialogueContent(contentsElement);
-        } else if (emoteData.type === "スタンプ") {
+        } else if (emoteType === "スタンプ") {
             emoteData.contents =
                 await this.extractStampContent(contentsElement);
         } else {
