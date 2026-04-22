@@ -1,0 +1,58 @@
+name: Build and VirusTotal Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Windows Build
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer and main process
+        run: npm run build
+
+      - name: Package Windows app
+        run: npm run buildwin
+
+      - name: Create ZIP artifact
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path packages/DQXChatManager-win32-x64/* `
+            -DestinationPath packages/DQXChatManager-win32-x64.zip `
+            -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DQXChatManager-win32-x64
+          path: packages/DQXChatManager-win32-x64.zip
+          if-no-files-found: error
+
+      - name: VirusTotal scan
+        if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: cssnr/virustotal-action@v1
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          file_globs: packages/DQXChatManager-win32-x64.zip
+          update_release: false
