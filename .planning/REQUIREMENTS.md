@@ -66,26 +66,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EDGE-01 | TBD | Pending |
-| EDGE-02 | TBD | Pending |
-| EDGE-03 | TBD | Pending |
-| DEPS-01 | TBD | Pending |
-| DEPS-02 | TBD | Pending |
-| DEPS-03 | TBD | Pending |
-| BEHV-01 | TBD | Pending |
-| BEHV-02 | TBD | Pending |
-| BEHV-03 | TBD | Pending |
-| SECU-01 | TBD | Pending |
-| SECU-02 | TBD | Pending |
-| SECU-03 | TBD | Pending |
-| VALD-01 | TBD | Pending |
-| VALD-02 | TBD | Pending |
-| VALD-03 | TBD | Pending |
+| EDGE-01 | Phase 1 | Pending |
+| EDGE-02 | Phase 1 | Pending |
+| EDGE-03 | Phase 1 | Pending |
+| SECU-01 | Phase 1 | Pending |
+| SECU-02 | Phase 1 | Pending |
+| DEPS-01 | Phase 2 | Pending |
+| DEPS-02 | Phase 2 | Pending |
+| DEPS-03 | Phase 2 | Pending |
+| VALD-03 | Phase 2 | Pending |
+| BEHV-01 | Phase 3 | Pending |
+| BEHV-02 | Phase 3 | Pending |
+| BEHV-03 | Phase 3 | Pending |
+| SECU-03 | Phase 3 | Pending |
+| VALD-01 | Phase 3 | Pending |
+| VALD-02 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-29*
