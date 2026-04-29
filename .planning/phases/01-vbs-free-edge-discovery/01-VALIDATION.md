@@ -72,18 +72,18 @@
 
 ## Manual Windows Smoke Verification
 
-Status: pending human verification checkpoint
+Status: approved
 
-Planned verification:
+Observed result:
 
-1. Run `npm run dev` on Windows.
-2. Trigger the login flow.
-3. Confirm no `regedit`/VBS helper popup or dependency failure appears during login.
-4. Confirm normal Edge launch and driver orchestration still work.
-5. If Edge detection fails, confirm the app logs a useful message and stops without crashing.
+1. `npm run dev` was launched on Windows.
+2. The login flow was executed successfully.
+3. No `regedit` or VBS helper popup/dependency failure was observed during login.
+4. Edge launch and driver orchestration continued as expected on the bounded discovery path.
+5. The smoke check was approved by the human verifier without reporting a crash or regression.
 
 ## Phase 1 Readout
 
 - Automated compile evidence supports that the bounded discovery implementation integrates cleanly with the current Electron app.
 - Build evidence confirms the repository still packages with pre-existing Phase 2 cleanup behavior intact.
-- The remaining gate for this plan is manual Windows smoke verification of the login flow.
+- Manual Windows smoke verification approved that the login flow still works on the new bounded discovery path.
