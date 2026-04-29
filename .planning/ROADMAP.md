@@ -7,7 +7,7 @@ This cycle removes the `regedit`/VBS dependency from Edge discovery and packagin
 ## Phases
 
 - [x] **Phase 1: VBS-Free Edge Discovery** - Replace registry access with a bounded, VBS-free way to find Edge and read its version.
-- [ ] **Phase 2: Dependency and Packaging Cleanup** - Remove `regedit` from the dependency graph and stop shipping VBS helpers.
+- [x] **Phase 2: Dependency and Packaging Cleanup** - Remove `regedit` from the dependency graph and stop shipping VBS helpers.
 - [ ] **Phase 3: Behavior Preservation and Validation** - Confirm login, driver download, import/export, and build behavior remain unchanged.
 
 ## Phase Details
@@ -35,7 +35,10 @@ Plans:
   2. `npm run build` no longer copies `node_modules/regedit/vbs/*` into `dist/vbs`.
   3. Active source and package metadata no longer contain required `regedit` or VBS references.
   4. A repository search for `regedit` and VBS only turns up intentional historical documentation, not active build/runtime dependency paths.
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 02-01-PLAN.md - Remove `regedit`/`cpx2` from manifest, lockfile, build script, and active build guidance.
+- [x] 02-02-PLAN.md - Record scoped validation evidence proving no active `regedit`/VBS dependency path remains.
 
 ### Phase 3: Behavior Preservation and Validation
 **Goal**: After the dependency cleanup, the app still behaves the same for login, driver management, import/export, and build validation.
@@ -47,12 +50,15 @@ Plans:
   3. Import and export behavior remains unchanged in normal use.
   4. `npm run compile` and `npm run build` both complete successfully after the cleanup.
   5. Electron renderer security settings remain unchanged: `contextIsolation` stays enabled and `nodeIntegration` stays disabled.
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 03-01-PLAN.md - Record compile/build gates plus preserved driver and Electron security source-contract evidence.
+- [ ] 03-02-PLAN.md - Run separate login/export/import Windows smoke checks and produce the final Phase 3 verification report.
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. VBS-Free Edge Discovery | 2/2 | Complete | 01-01, 01-02 |
-| 2. Dependency and Packaging Cleanup | 0/TBD | Not started | - |
-| 3. Behavior Preservation and Validation | 0/TBD | Not started | - |
+| 2. Dependency and Packaging Cleanup | 2/2 | Complete | 02-01, 02-02 |
+| 3. Behavior Preservation and Validation | 1/2 | In progress | 03-01 |
