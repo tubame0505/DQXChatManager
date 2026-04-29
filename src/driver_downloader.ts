@@ -241,17 +241,29 @@ export class DriverDownloader {
     private async getWindowsExeVersion(
         exePath: string
     ): Promise<string | undefined> {
-        const exePathLiteral = this.toPowerShellSingleQuotedLiteral(exePath);
-        const version = await this.runPowerShellQuery(
-            `(Get-Item -LiteralPath ${exePathLiteral}).VersionInfo.ProductVersion`
-        );
+        try {
+            const exePathLiteral = this.toPowerShellSingleQuotedLiteral(
+                exePath
+            );
+            const version = await this.runPowerShellQuery(
+                `(Get-Item -LiteralPath ${exePathLiteral}).VersionInfo.ProductVersion`
+            );
 
-        if (!version) {
-            this.logger.warn(`Version query returned empty output: ${exePath}`);
+            if (!version) {
+                this.logger.warn(
+                    `Version query returned empty output: ${exePath}`
+                );
+                return undefined;
+            }
+
+            return version;
+        } catch (error) {
+            this.logger.error(
+                `Failed to query Edge product version: ${exePath}`,
+                error instanceof Error ? error : undefined
+            );
             return undefined;
         }
-
-        return version;
     }
 
     private async runPowerShellQuery(command: string): Promise<string> {
