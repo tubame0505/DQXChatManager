@@ -6,7 +6,7 @@ This cycle removes the `regedit`/VBS dependency from Edge discovery and packagin
 
 ## Phases
 
-- [ ] **Phase 1: VBS-Free Edge Discovery** - Replace registry access with a bounded, VBS-free way to find Edge and read its version.
+- [x] **Phase 1: VBS-Free Edge Discovery** - Replace registry access with a bounded, VBS-free way to find Edge and read its version.
 - [ ] **Phase 2: Dependency and Packaging Cleanup** - Remove `regedit` from the dependency graph and stop shipping VBS helpers.
 - [ ] **Phase 3: Behavior Preservation and Validation** - Confirm login, driver download, import/export, and build behavior remain unchanged.
 
@@ -24,7 +24,7 @@ This cycle removes the `regedit`/VBS dependency from Edge discovery and packagin
 **Plans**: 2 plans
 Plans:
 - [x] 01-01-PLAN.md - Replace regedit-based Edge discovery with bounded PowerShell helpers in `DriverDownloader`.
-- [ ] 01-02-PLAN.md - Validate the new discovery contract with compile/build evidence and a Windows login smoke check.
+- [x] 01-02-PLAN.md - Validate the new discovery contract with compile/build evidence and a Windows login smoke check.
 
 ### Phase 2: Dependency and Packaging Cleanup
 **Goal**: The runtime and build pipeline no longer depend on `regedit` or copied VBS artifacts.
@@ -53,6 +53,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. VBS-Free Edge Discovery | 1/2 | In progress | 01-01 |
+| 1. VBS-Free Edge Discovery | 2/2 | Complete | 01-01, 01-02 |
 | 2. Dependency and Packaging Cleanup | 0/TBD | Not started | - |
 | 3. Behavior Preservation and Validation | 0/TBD | Not started | - |
