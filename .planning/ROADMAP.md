@@ -21,7 +21,10 @@ This cycle removes the `regedit`/VBS dependency from Edge discovery and packagin
   2. The app can read the installed Edge product version without relying on VBS or Windows Script Host helper files.
   3. If Edge path or version detection fails, the app stops with a controlled error and logs a useful message.
   4. Registry access stays limited to the allowed Edge App Paths location, and shell execution uses fixed commands and arguments.
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 01-01-PLAN.md - Replace regedit-based Edge discovery with bounded PowerShell helpers in `DriverDownloader`.
+- [ ] 01-02-PLAN.md - Validate the new discovery contract with compile/build evidence and a Windows login smoke check.
 
 ### Phase 2: Dependency and Packaging Cleanup
 **Goal**: The runtime and build pipeline no longer depend on `regedit` or copied VBS artifacts.
@@ -50,6 +53,6 @@ This cycle removes the `regedit`/VBS dependency from Edge discovery and packagin
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. VBS-Free Edge Discovery | 0/TBD | Not started | - |
+| 1. VBS-Free Edge Discovery | 1/2 | In progress | 01-01 |
 | 2. Dependency and Packaging Cleanup | 0/TBD | Not started | - |
 | 3. Behavior Preservation and Validation | 0/TBD | Not started | - |

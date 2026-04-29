@@ -7,9 +7,12 @@
 
 ### Edge Discovery
 
-- [ ] **EDGE-01**: App can discover the installed Microsoft Edge executable path on Windows without using the `regedit` npm package.
-- [ ] **EDGE-02**: App can read the installed Microsoft Edge product version without using VBS or Windows Script Host helper files.
-- [ ] **EDGE-03**: App returns a controlled failure and logs a useful error when Edge path or version detection fails.
+- [x] **EDGE-01
+**: App can discover the installed Microsoft Edge executable path on Windows without using the `regedit` npm package.
+- [x] **EDGE-02
+**: App can read the installed Microsoft Edge product version without using VBS or Windows Script Host helper files.
+- [x] **EDGE-03
+**: App returns a controlled failure and logs a useful error when Edge path or version detection fails.
 
 ### Dependency Cleanup
 
@@ -25,8 +28,10 @@
 
 ### Security
 
-- [ ] **SECU-01**: Edge discovery only queries the allowed Edge App Paths registry location or an explicitly bounded fallback.
-- [ ] **SECU-02**: Shell execution uses fixed executable names and argument arrays, with no user-controlled command string construction.
+- [x] **SECU-01
+**: Edge discovery only queries the allowed Edge App Paths registry location or an explicitly bounded fallback.
+- [x] **SECU-02
+**: Shell execution uses fixed executable names and argument arrays, with no user-controlled command string construction.
 - [ ] **SECU-03**: Existing Electron renderer security settings remain unchanged: `contextIsolation` stays enabled and `nodeIntegration` stays disabled.
 
 ### Validation
@@ -66,11 +71,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EDGE-01 | Phase 1 | Pending |
-| EDGE-02 | Phase 1 | Pending |
-| EDGE-03 | Phase 1 | Pending |
-| SECU-01 | Phase 1 | Pending |
-| SECU-02 | Phase 1 | Pending |
+| EDGE-01 | Phase 1 | Complete |
+| EDGE-02 | Phase 1 | Complete |
+| EDGE-03 | Phase 1 | Complete |
+| SECU-01 | Phase 1 | Complete |
+| SECU-02 | Phase 1 | Complete |
 | DEPS-01 | Phase 2 | Pending |
 | DEPS-02 | Phase 2 | Pending |
 | DEPS-03 | Phase 2 | Pending |
