@@ -18,13 +18,16 @@ Users can launch the app and log in through Edge without VBS/Windows Script Host
 - ✓ User can import tab-separated emote settings back into DQX Hiroba — existing
 - ✓ App can download and cache the matching Microsoft EdgeDriver version under the app directory — existing
 - ✓ Renderer access to privileged APIs is mediated through `contextBridge` with `contextIsolation` enabled and `nodeIntegration` disabled — existing
+- ✓ `regedit` is removed from active package metadata and runtime dependencies — validated in Phase 2
+- ✓ `npm run build` no longer copies VBS helpers into `dist/vbs` — validated in Phase 2
+- ✓ Active source and package metadata no longer require `regedit` or VBS references outside historical documentation — validated in Phase 2
+- ✓ Existing Edge version-driven login flow remains intact after cleanup — validated in Phase 3
+- ✓ `npm run compile` and `npm run build` both succeed after cleanup — validated in Phase 3
+- ✓ Existing login, export, and import behavior passed Windows smoke verification after cleanup — validated in Phase 3
 
 ### Active
 
-- [ ] Replace `regedit` registry access with a VBS-free Edge discovery implementation.
-- [ ] Remove `regedit` and copied VBS artifacts from the build/package dependency path.
-- [ ] Preserve existing Edge version detection, EdgeDriver download, and login behavior on Windows.
-- [ ] Keep registry/path validation and command execution security boundaries at least as strict as the current implementation.
+- [ ] Define the next milestone scope and fresh requirements.
 
 ### Out of Scope
 
@@ -35,9 +38,9 @@ Users can launch the app and log in through Edge without VBS/Windows Script Host
 
 ## Context
 
-The current implementation reads `HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe` through the `regedit` npm package in `src/driver_downloader.ts`, then invokes PowerShell to read `VersionInfo.ProductVersion` from the discovered executable. The `regedit` package uses Windows Script Host (`cscript.exe`) and `.wsf`/`.vbs` helper files internally, so `npm run build` currently copies `node_modules/regedit/vbs/*` into `dist/vbs`.
+The current implementation reads `HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe` through bounded PowerShell in `src/driver_downloader.ts`, then reads `VersionInfo.ProductVersion` from the discovered executable. Package metadata no longer depends on the `regedit` npm package or copied VBS helper files.
 
-The codebase map identifies this as a packaging and operational concern: `buildwin` packages prebuilt artifacts, `dist/` is generated, and release correctness depends on local build state. Removing `regedit` should simplify the artifact graph and eliminate the need to ship VBS helpers, while keeping the browser discovery source the same.
+The codebase map identifies this as a packaging and operational concern: `buildwin` packages prebuilt artifacts, `dist/` is generated, and release correctness depends on local build state. Removing `regedit` simplified the artifact graph and eliminated the need to ship VBS helpers while keeping the browser discovery source the same.
 
 The preferred implementation discussed before initialization is PowerShell-based registry discovery using fixed command arguments and no user-controlled command text. This is acceptable because the existing implementation already depends on PowerShell for Edge version extraction.
 
@@ -53,9 +56,18 @@ The preferred implementation discussed before initialization is PowerShell-based
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Use PowerShell instead of `regedit` for Edge registry/version lookup | Removes VBS/Windows Script Host packaging dependency while staying close to current behavior | — Pending |
-| Keep Windows-only scope | Existing packaged app and EdgeDriver flow are already Windows x64 oriented | — Pending |
-| Treat this as dependency cleanup, not automation redesign | Limits risk and keeps the milestone focused | — Pending |
+| Use PowerShell instead of `regedit` for Edge registry/version lookup | Removes VBS/Windows Script Host packaging dependency while staying close to current behavior | Validated in Phase 1 |
+| Keep Windows-only scope | Existing packaged app and EdgeDriver flow are already Windows x64 oriented | Validated in Phase 1 |
+| Treat this as dependency cleanup, not automation redesign | Limits risk and keeps the milestone focused | Validated in Phase 1 |
+
+## Current State
+
+Milestone v1.0 is shipped and archived. The app resolves Edge through bounded PowerShell registry discovery in `src/driver_downloader.ts`, package/build metadata no longer depend on `regedit`, `cpx2`, or VBS copy steps, and Phase 3 recorded successful compile/build gates plus approved Windows `login` / `export` / `import` smoke verification.
+
+## Next Milestone Goals
+
+- Define whether the next cycle prioritizes broader platform support, automated regression coverage, or unrelated product work.
+- Create a fresh `.planning/REQUIREMENTS.md` through the next milestone workflow instead of carrying v1 scope forward implicitly.
 
 ## Evolution
 
@@ -75,4 +87,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-29 after initialization*
+*Last updated: 2026-04-29 after v1.0 milestone archival*

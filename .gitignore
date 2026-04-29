@@ -1,5 +1,6 @@
 dist
 node_modules
+.npm-cache
 release
 npm-*.log
 pnpm-*.log

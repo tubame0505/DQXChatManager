@@ -10,7 +10,7 @@ Install dependencies with `npm install`.
 
 - `npm run dev`: starts the TypeScript watcher, webpack, and Electron for local development.
 - `npm run compile`: compiles the Electron main process and builds the renderer in development mode without watch.
-- `npm run build`: creates a production `dist/` bundle and copies required `regedit` VBS files.
+- `npm run build`: creates a production `dist/` bundle.
 - `npm run buildwin`: packages the Windows app into `packages/`.
 
 Before opening a PR, run `npm run compile` and `npm run build` to catch type and bundling regressions.

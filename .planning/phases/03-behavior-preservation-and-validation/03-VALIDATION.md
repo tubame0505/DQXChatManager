@@ -6,7 +6,7 @@
 
 ## Scope Boundary
 
-- This artifact records automated validation evidence and preserved source-contract evidence only.
+- This artifact records automated validation evidence, preserved source-contract evidence, and manual Windows smoke verification outcomes.
 - Phase 3 does not redesign runtime behavior, WebDriver orchestration, or Electron security settings.
 - Generated outputs such as `dist/` and `packages/` are observed command results only and are never hand-edited.
 
@@ -38,6 +38,10 @@
   - `selenium-webdriver/lib/http.js`: `Critical dependency: the request of a dependency is an expression`
   - `ws/lib/buffer-util.js`: `Can't resolve 'bufferutil'`
   - `ws/lib/validation.js`: `Can't resolve 'utf-8-validate'`
+
+### Gate Timestamp Note
+
+- The `npm run compile` and `npm run build` timestamps above reflect the same batch-capture time from the Phase 3 automated gate run.
 
 ## Gate Readout
 
@@ -86,3 +90,43 @@
 - `SECU-03`: pass
 - `BEHV-01` source-contract portion: pass
 - Regression note: none detected while inspecting the preserved security and driver orchestration contracts.
+
+## Manual Windows Smoke Verification
+
+Status: approved
+
+### `login`
+
+- Result: passed
+- Requirement impact: `BEHV-01`, `BEHV-02`
+- Observed outcome:
+  - `npm run dev` was used on Windows as the runtime smoke path.
+  - The normal login flow completed successfully.
+  - The app continued through the existing EdgeDriver path without a reported regression.
+  - No failure boundary was reported for cached-driver reuse or matching-driver download behavior.
+
+### `export`
+
+- Result: passed
+- Requirement impact: `BEHV-03`
+- Observed outcome:
+  - The normal export flow completed successfully after login.
+  - No runtime regression was reported for export orchestration or completion behavior.
+
+### `import`
+
+- Result: passed
+- Requirement impact: `BEHV-03`
+- Observed outcome:
+  - The normal import flow completed successfully after login.
+  - No runtime regression was reported for import orchestration or confirmation-dialog handling.
+
+## Phase 3 Validation Readout
+
+- `VALD-01`: pass
+- `VALD-02`: pass
+- `SECU-03`: pass
+- `BEHV-01`: pass
+- `BEHV-02`: pass
+- `BEHV-03`: pass
+- Regression boundary: none reported in the approved Windows `login` / `export` / `import` smoke run.

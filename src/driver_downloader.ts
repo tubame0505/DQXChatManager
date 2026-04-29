@@ -1,5 +1,6 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
 import path from "path";
+import fs from "fs";
 import * as compressing from "compressing";
 import * as util from "util";
 import * as child_process from "child_process";
@@ -12,7 +13,6 @@ import {
 import { Logger, ConsoleLogger } from "./utils/logger";
 
 const CDN_URL = "https://msedgedriver.microsoft.com/";
-const POWERSHELL_EXECUTABLE = "powershell.exe";
 const POWERSHELL_FIXED_ARGS = [
     "-NoProfile",
     "-NonInteractive",
@@ -267,9 +267,10 @@ export class DriverDownloader {
     }
 
     private async runPowerShellQuery(command: string): Promise<string> {
+        const powerShellExecutable = this.getPowerShellExecutablePath();
         const runCommand = util.promisify(child_process.execFile);
         const result = await runCommand(
-            POWERSHELL_EXECUTABLE,
+            powerShellExecutable,
             [...POWERSHELL_FIXED_ARGS, command],
             {
                 timeout: 10000,
@@ -279,6 +280,25 @@ export class DriverDownloader {
         );
 
         return result.stdout.trim();
+    }
+
+    private getPowerShellExecutablePath(): string {
+        const systemRoot = process.env.SystemRoot ?? "C:\\Windows";
+        const powerShellExecutable = path.join(
+            systemRoot,
+            "System32",
+            "WindowsPowerShell",
+            "v1.0",
+            "powershell.exe"
+        );
+
+        if (!fs.existsSync(powerShellExecutable)) {
+            throw new Error(
+                `PowerShell executable not found: ${powerShellExecutable}`
+            );
+        }
+
+        return powerShellExecutable;
     }
 
     private toPowerShellSingleQuotedLiteral(value: string): string {

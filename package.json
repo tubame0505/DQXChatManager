@@ -10,7 +10,7 @@
     "main": "dist/main.js",
     "scripts": {
         "compile": "tsc -p tsconfig.main.json && cross-env NODE_ENV=\"development\" NO_WATCH=\"true\" webpack",
-        "build": "cross-env NODE_ENV=\"production\" webpack --progress && cpx node_modules/regedit/vbs/* dist/vbs",
+        "build": "cross-env NODE_ENV=\"production\" webpack --progress",
         "buildwin": "electron-packager . DQXChatManager --platform=win32 --arch=x64 --overwrite --ignore='src' --ignore 'node_modules' --ignore='.vscode' --ignore='media' --out=packages",
         "dev": "run-p dev:*",
         "predev": "rimraf dist",
@@ -23,7 +23,6 @@
         "punycode": "^2.3.1",
         "react": "^19.2.5",
         "react-dom": "^19.2.5",
-        "regedit": "^5.1.4",
         "selenium-webdriver": "^4.43.0"
     },
     "devDependencies": {
@@ -34,7 +33,6 @@
         "@types/selenium-webdriver": "^4.35.5",
         "@typescript-eslint/eslint-plugin": "^8.58.2",
         "@typescript-eslint/parser": "^8.58.2",
-        "cpx2": "^8.0.2",
         "cross-env": "^10.1.0",
         "css-loader": "^7.1.4",
         "electron": "^41.2.0",

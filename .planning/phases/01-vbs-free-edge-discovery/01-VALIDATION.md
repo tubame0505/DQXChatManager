@@ -41,7 +41,7 @@
 
 ### Bounded PowerShell execution
 
-- `src/driver_downloader.ts:15` uses fixed executable `powershell.exe`.
+- `src/driver_downloader.ts:15` resolves PowerShell from `SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe`.
 - `src/driver_downloader.ts:16` defines the fixed argument array `-NoProfile`, `-NonInteractive`, `-ExecutionPolicy`, `Bypass`, `-Command`.
 - `src/driver_downloader.ts:271` runs PowerShell through `execFile` with the fixed executable and argument array.
 
