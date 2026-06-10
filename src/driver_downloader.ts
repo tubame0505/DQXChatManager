@@ -1,9 +1,10 @@
 /*! DQXChatManager | The MIT License | https://github.com/tubame0505/DQXChatManager/blob/main/LICENSE.md */
 import path from "path";
+import fs from "fs";
 import * as compressing from "compressing";
 import * as util from "util";
-import * as regedit from "regedit";
 import * as child_process from "child_process";
+import { APP_CONFIG } from "./config/app-config";
 import { SecureFileManager } from "./security/secure-file-manager";
 import {
     RegistryValidator,
@@ -11,9 +12,14 @@ import {
 } from "./security/security-validator";
 import { Logger, ConsoleLogger } from "./utils/logger";
 
-const WINDOWS_REGISTRY_APP_PATHS =
-    "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe";
 const CDN_URL = "https://msedgedriver.microsoft.com/";
+const POWERSHELL_FIXED_ARGS = [
+    "-NoProfile",
+    "-NonInteractive",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-Command",
+] as const;
 
 export interface DriverResult {
     path?: string;
@@ -162,27 +168,31 @@ export class DriverDownloader {
 
         try {
             const exePath = await this.getWindowsExePath(
-                WINDOWS_REGISTRY_APP_PATHS
+                APP_CONFIG.REGISTRY.EDGE_PATH
             );
             if (!exePath) {
                 this.logger.warn("Edge executable path not found in registry");
                 return undefined;
             }
 
-            const runCommand = util.promisify(child_process.execFile);
-            const result = await runCommand(
-                "powershell",
-                [`(Get-Item "${exePath}").VersionInfo.ProductVersion`],
-                {
-                    timeout: 10000, // 10秒タイムアウト
-                    maxBuffer: 1024, // バッファサイズ制限
-                }
-            );
+            const version = await this.getWindowsExeVersion(exePath);
+            if (!version) {
+                this.logger.error(
+                    `Failed to extract Edge product version from: ${exePath}`
+                );
+                return undefined;
+            }
 
-            const version = result.stdout.split("\r")[0].trim();
             this.logger.debug(`Detected Edge version: ${version}`);
             return version;
         } catch (error) {
+            if (error instanceof SecurityError) {
+                this.logger.error(
+                    "Security violation in browser version discovery",
+                    error
+                );
+                throw error;
+            }
             this.logger.error(
                 "Failed to get browser version",
                 error instanceof Error ? error : undefined
@@ -195,25 +205,21 @@ export class DriverDownloader {
         regPath: string
     ): Promise<string | undefined> {
         try {
-            // セキュリティ検証
-            RegistryValidator.validateRegistryPath(regPath);
+            const validatedRegPath = RegistryValidator.validateRegistryPath(
+                regPath
+            );
+            const registryLiteral = this.toPowerShellSingleQuotedLiteral(
+                this.toRegistryProviderPath(validatedRegPath)
+            );
+            const exePath = await this.runPowerShellQuery(
+                `(Get-Item -LiteralPath ${registryLiteral}).GetValue('')`
+            );
 
-            const regQuery = util.promisify(regedit.list);
-            let result: any = await regQuery([regPath]);
-
-            if (!result[regPath]?.exists || !result[regPath]?.values?.[""]) {
-                this.logger.debug(
-                    `Registry path not found on first try: ${regPath}`
-                );
-                result = await regQuery([regPath]);
-            }
-
-            if (!result[regPath]?.exists || !result[regPath]?.values?.[""]) {
+            if (!exePath) {
                 this.logger.warn(`Registry path does not exist: ${regPath}`);
                 return undefined;
             }
 
-            const exePath = result[regPath].values[""].value;
             this.logger.debug(`Found executable path: ${exePath}`);
             return exePath;
         } catch (error) {
@@ -230,6 +236,77 @@ export class DriverDownloader {
             );
             return undefined;
         }
+    }
+
+    private async getWindowsExeVersion(
+        exePath: string
+    ): Promise<string | undefined> {
+        try {
+            const exePathLiteral = this.toPowerShellSingleQuotedLiteral(
+                exePath
+            );
+            const version = await this.runPowerShellQuery(
+                `(Get-Item -LiteralPath ${exePathLiteral}).VersionInfo.ProductVersion`
+            );
+
+            if (!version) {
+                this.logger.warn(
+                    `Version query returned empty output: ${exePath}`
+                );
+                return undefined;
+            }
+
+            return version;
+        } catch (error) {
+            this.logger.error(
+                `Failed to query Edge product version: ${exePath}`,
+                error instanceof Error ? error : undefined
+            );
+            return undefined;
+        }
+    }
+
+    private async runPowerShellQuery(command: string): Promise<string> {
+        const powerShellExecutable = this.getPowerShellExecutablePath();
+        const runCommand = util.promisify(child_process.execFile);
+        const result = await runCommand(
+            powerShellExecutable,
+            [...POWERSHELL_FIXED_ARGS, command],
+            {
+                timeout: 10000,
+                maxBuffer: 1024,
+                windowsHide: true,
+            }
+        );
+
+        return result.stdout.trim();
+    }
+
+    private getPowerShellExecutablePath(): string {
+        const systemRoot = process.env.SystemRoot ?? "C:\\Windows";
+        const powerShellExecutable = path.join(
+            systemRoot,
+            "System32",
+            "WindowsPowerShell",
+            "v1.0",
+            "powershell.exe"
+        );
+
+        if (!fs.existsSync(powerShellExecutable)) {
+            throw new Error(
+                `PowerShell executable not found: ${powerShellExecutable}`
+            );
+        }
+
+        return powerShellExecutable;
+    }
+
+    private toPowerShellSingleQuotedLiteral(value: string): string {
+        return `'${value.replace(/'/g, "''")}'`;
+    }
+
+    private toRegistryProviderPath(regPath: string): string {
+        return `Registry::${regPath.replace("HKLM\\", "HKEY_LOCAL_MACHINE\\")}`;
     }
 
     private getDriverPath(basePath: string, version: string): string {
