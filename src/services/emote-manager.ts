@@ -219,7 +219,7 @@ export class EmoteManager implements IEmoteManager {
         }
 
         const listHolderStyle = await listHolder.getAttribute("class");
-        if (listHolderStyle.indexOf("hide") > 0) {
+        if (listHolderStyle && listHolderStyle.indexOf("hide") > 0) {
             await WebDriverUtils.clickElementSafely(driver, listHolder);
             await this.webDriverSession.waitUntilListOpen(
                 XPathSelectors.EMOTE_CONTENT_LINK(pageId, 1)
@@ -377,7 +377,7 @@ export class EmoteManager implements IEmoteManager {
         }
 
         const listHolderStyle = await listHolder.getAttribute("class");
-        if (listHolderStyle.indexOf("hide") > 0) {
+        if (listHolderStyle && listHolderStyle.indexOf("hide") > 0) {
             await WebDriverUtils.clickElementSafely(driver, listHolder);
             await this.webDriverSession.waitUntilListOpen(
                 XPathSelectors.EMOTE_CONTENT_LINK(
